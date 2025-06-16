@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Dashboard from '@/components/Dashboard';
 import AddPurchaseForm from '@/components/AddPurchaseForm';
 import AddCategoryForm from '@/components/AddCategoryForm';
+import PurchaseTable from '@/components/PurchaseTable';
 import Login from '@/components/Login';
 
 interface Purchase {
@@ -131,6 +131,16 @@ const Index = () => {
     setActiveSection('home'); // Navigate back to home after adding category
   };
 
+  const handleUpdatePurchase = (updatedPurchase: Purchase) => {
+    setPurchases(prev => prev.map(purchase => 
+      purchase.id === updatedPurchase.id ? updatedPurchase : purchase
+    ));
+  };
+
+  const handleDeletePurchase = (id: string) => {
+    setPurchases(prev => prev.filter(purchase => purchase.id !== id));
+  };
+
   // If not authenticated, show login screen
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
@@ -144,6 +154,13 @@ const Index = () => {
         return <AddPurchaseForm onAddPurchase={handleAddPurchase} categories={categories} />;
       case 'add-category':
         return <AddCategoryForm onAddCategory={handleAddCategory} onBack={() => setActiveSection('home')} />;
+      case 'purchases':
+        return <PurchaseTable 
+          purchases={purchases} 
+          categories={categories}
+          onUpdatePurchase={handleUpdatePurchase}
+          onDeletePurchase={handleDeletePurchase}
+        />;
       default:
         return <Hero setActiveSection={setActiveSection} />;
     }
