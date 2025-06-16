@@ -16,24 +16,31 @@ interface Purchase {
   date: string;
 }
 
-interface AddPurchaseFormProps {
-  onAddPurchase: (purchase: Purchase) => void;
+interface Category {
+  id: string;
+  name: string;
+  label: string;
 }
 
-const categories = [
-  { value: 'food', label: 'Alimentícia', color: 'bg-green-500' },
-  { value: 'pharmacy', label: 'Farmacêutica', color: 'bg-red-500' },
-  { value: 'subscriptions', label: 'Assinaturas', color: 'bg-purple-500' },
-  { value: 'transport', label: 'Transporte', color: 'bg-blue-500' },
-  { value: 'clothing', label: 'Vestuário', color: 'bg-pink-500' },
-  { value: 'entertainment', label: 'Entretenimento', color: 'bg-yellow-500' },
-  { value: 'health', label: 'Saúde', color: 'bg-teal-500' },
-  { value: 'education', label: 'Educação', color: 'bg-indigo-500' },
-  { value: 'utilities', label: 'Contas/Utilidades', color: 'bg-orange-500' },
-  { value: 'others', label: 'Outros', color: 'bg-gray-500' }
-];
+interface AddPurchaseFormProps {
+  onAddPurchase: (purchase: Purchase) => void;
+  categories: Category[];
+}
 
-const AddPurchaseForm = ({ onAddPurchase }: AddPurchaseFormProps) => {
+const categoryColors = {
+  food: 'bg-green-500',
+  pharmacy: 'bg-red-500',
+  subscriptions: 'bg-purple-500',
+  transport: 'bg-blue-500',
+  clothing: 'bg-pink-500',
+  entertainment: 'bg-yellow-500',
+  health: 'bg-teal-500',
+  education: 'bg-indigo-500',
+  utilities: 'bg-orange-500',
+  others: 'bg-gray-500'
+};
+
+const AddPurchaseForm = ({ onAddPurchase, categories }: AddPurchaseFormProps) => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
@@ -133,9 +140,9 @@ const AddPurchaseForm = ({ onAddPurchase }: AddPurchaseFormProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
+                      <SelectItem key={cat.id} value={cat.name}>
                         <div className="flex items-center space-x-2">
-                          <div className={`w-3 h-3 rounded-full ${cat.color}`}></div>
+                          <div className={`w-3 h-3 rounded-full ${categoryColors[cat.name as keyof typeof categoryColors] || 'bg-gray-500'}`}></div>
                           <span>{cat.label}</span>
                         </div>
                       </SelectItem>
