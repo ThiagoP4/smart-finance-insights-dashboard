@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Search, Edit, Trash2, Filter } from 'lucide-react';
+import { Search, Edit, Trash2, Filter, Download, FileSpreadsheet, FileText, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { exportToExcel, exportToCSV, exportToPowerBI } from '@/utils/exportUtils';
 
 interface Purchase {
   id: string;
@@ -53,8 +53,9 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(15);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [editForm, setEditForm] = useState({
     description: '',
     amount: '',
@@ -190,155 +191,232 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
     });
   };
 
+  const handleExportExcel = () => {
+    exportToExcel(filteredAndSortedPurchases, categories);
+    toast({
+      title: "Exportação realizada!",
+      description: "Arquivo Excel baixado com sucesso.",
+    });
+  };
+
+  const handleExportCSV = () => {
+    exportToCSV(filteredAndSortedPurchases, categories);
+    toast({
+      title: "Exportação realizada!",
+      description: "Arquivo CSV baixado com sucesso.",
+    });
+  };
+
+  const handleExportPowerBI = () => {
+    exportToPowerBI(filteredAndSortedPurchases, categories);
+    toast({
+      title: "Exportação realizada!",
+      description: "Arquivo JSON para Power BI baixado com sucesso.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Planilha de Compras
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Gerencie, filtre e analise todas as suas compras cadastradas
-          </p>
-        </div>
-
-        {/* Filters */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm mb-6">
-          <CardHeader>
-            <CardTitle className="text-xl text-gray-800 flex items-center">
-              <Filter className="w-5 h-5 mr-2" />
-              Filtros e Busca
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="search">Buscar</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="search"
-                    placeholder="Buscar por descrição..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="category-filter">Categoria</Label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todas as categorias" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as categorias</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.name}>
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-3 h-3 rounded-full ${categoryColors[cat.name as keyof typeof categoryColors] || 'bg-gray-500'}`}></div>
-                          <span>{cat.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="date-filter">Período</Label>
-                <Select value={dateFilter} onValueChange={setDateFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos os períodos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os períodos</SelectItem>
-                    <SelectItem value="today">Hoje</SelectItem>
-                    <SelectItem value="week">Última semana</SelectItem>
-                    <SelectItem value="month">Último mês</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="sort">Ordenar por</Label>
-                <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-                  const [newSortBy, newSortOrder] = value.split('-');
-                  setSortBy(newSortBy);
-                  setSortOrder(newSortOrder);
-                }}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="date-desc">Data (mais recente)</SelectItem>
-                    <SelectItem value="date-asc">Data (mais antiga)</SelectItem>
-                    <SelectItem value="amount-desc">Valor (maior)</SelectItem>
-                    <SelectItem value="amount-asc">Valor (menor)</SelectItem>
-                    <SelectItem value="description-asc">Descrição (A-Z)</SelectItem>
-                    <SelectItem value="description-desc">Descrição (Z-A)</SelectItem>
-                    <SelectItem value="category-asc">Categoria (A-Z)</SelectItem>
-                  </SelectContent>
-                </Select>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                Cadastros de Compras
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Gerencie, filtre e analise todos os seus cadastros
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => setShowFilters(!showFilters)}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filtros</span>
+              </Button>
+              
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleExportExcel}
+                  variant="outline"
+                  className="flex items-center space-x-2 text-green-600 hover:text-green-700"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span className="hidden sm:inline">Excel</span>
+                </Button>
+                
+                <Button
+                  onClick={handleExportCSV}
+                  variant="outline"
+                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span className="hidden sm:inline">CSV</span>
+                </Button>
+                
+                <Button
+                  onClick={handleExportPowerBI}
+                  variant="outline"
+                  className="flex items-center space-x-2 text-yellow-600 hover:text-yellow-700"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Power BI</span>
+                </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Table */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        {/* Collapsible Filters */}
+        {showFilters && (
+          <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm mb-6">
+            <CardHeader>
+              <CardTitle className="text-xl text-gray-800 flex items-center">
+                <Filter className="w-5 h-5 mr-2" />
+                Filtros e Busca
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="search">Buscar</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="search"
+                      placeholder="Buscar por descrição..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="category-filter">Categoria</Label>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas as categorias" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as categorias</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-3 h-3 rounded-full ${categoryColors[cat.name as keyof typeof categoryColors] || 'bg-gray-500'}`}></div>
+                            <span>{cat.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="date-filter">Período</Label>
+                  <Select value={dateFilter} onValueChange={setDateFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos os períodos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os períodos</SelectItem>
+                      <SelectItem value="today">Hoje</SelectItem>
+                      <SelectItem value="week">Última semana</SelectItem>
+                      <SelectItem value="month">Último mês</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="sort">Ordenar por</Label>
+                  <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
+                    const [newSortBy, newSortOrder] = value.split('-');
+                    setSortBy(newSortBy);
+                    setSortOrder(newSortOrder);
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="date-desc">Data (mais recente)</SelectItem>
+                      <SelectItem value="date-asc">Data (mais antiga)</SelectItem>
+                      <SelectItem value="amount-desc">Valor (maior)</SelectItem>
+                      <SelectItem value="amount-asc">Valor (menor)</SelectItem>
+                      <SelectItem value="description-asc">Descrição (A-Z)</SelectItem>
+                      <SelectItem value="description-desc">Descrição (Z-A)</SelectItem>
+                      <SelectItem value="category-asc">Categoria (A-Z)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Enhanced Table */}
+        <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-xl text-gray-800">
-              Compras Cadastradas ({filteredAndSortedPurchases.length} {filteredAndSortedPurchases.length === 1 ? 'item' : 'itens'})
-            </CardTitle>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <CardTitle className="text-xl text-gray-800">
+                Cadastros ({filteredAndSortedPurchases.length} {filteredAndSortedPurchases.length === 1 ? 'item' : 'itens'})
+              </CardTitle>
+              <div className="text-sm text-gray-600 font-medium">
+                Total: R$ {filteredAndSortedPurchases.reduce((sum, p) => sum + p.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-gray-50">
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-gray-100 font-semibold"
                       onClick={() => handleSort('description')}
                     >
                       Descrição {sortBy === 'description' && (sortOrder === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-gray-100 font-semibold text-right"
                       onClick={() => handleSort('amount')}
                     >
                       Valor {sortBy === 'amount' && (sortOrder === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-gray-100 font-semibold"
                       onClick={() => handleSort('category')}
                     >
                       Categoria {sortBy === 'category' && (sortOrder === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-gray-100 font-semibold"
                       onClick={() => handleSort('date')}
                     >
                       Data {sortBy === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
                     </TableHead>
-                    <TableHead>Ações</TableHead>
+                    <TableHead className="font-semibold text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedPurchases.map((purchase) => (
-                    <TableRow key={purchase.id}>
-                      <TableCell className="font-medium">{purchase.description}</TableCell>
-                      <TableCell>R$ {purchase.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-3 h-3 rounded-full ${categoryColors[purchase.category as keyof typeof categoryColors] || 'bg-gray-500'}`}></div>
-                          <span>{categoryLabels[purchase.category] || purchase.category}</span>
+                  {paginatedPurchases.map((purchase, index) => (
+                    <TableRow key={purchase.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
+                      <TableCell className="font-medium py-4">{purchase.description}</TableCell>
+                      <TableCell className="text-right py-4 font-semibold text-green-600">
+                        R$ {purchase.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-4 h-4 rounded-full ${categoryColors[purchase.category as keyof typeof categoryColors] || 'bg-gray-500'}`}></div>
+                          <span className="font-medium">{categoryLabels[purchase.category] || purchase.category}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{new Date(purchase.date).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
+                      <TableCell className="py-4 font-medium">{new Date(purchase.date).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="py-4">
+                        <div className="flex justify-center space-x-2">
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button 

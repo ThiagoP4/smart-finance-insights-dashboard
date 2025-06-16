@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart, Plus, Tag, LogOut, FileSpreadsheet } from 'lucide-react';
 
@@ -11,7 +12,7 @@ const Navbar = ({ activeSection, setActiveSection, onLogout }: NavbarProps) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart },
     { id: 'add-purchase', label: 'Nova Compra', icon: Plus },
-    { id: 'purchases', label: 'Planilha', icon: FileSpreadsheet },
+    { id: 'purchases', label: 'Cadastros', icon: FileSpreadsheet },
     { id: 'add-category', label: 'Nova Categoria', icon: Tag }
   ];
 
