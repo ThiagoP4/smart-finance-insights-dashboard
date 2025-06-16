@@ -12,8 +12,15 @@ interface Purchase {
   date: string;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  label: string;
+}
+
 interface DashboardProps {
   purchases: Purchase[];
+  categories?: Category[];
 }
 
 const categoryColors = {
@@ -29,7 +36,7 @@ const categoryColors = {
   others: '#6b7280'
 };
 
-const categoryLabels = {
+const defaultCategoryLabels = {
   food: 'Alimentícia',
   pharmacy: 'Farmacêutica',
   subscriptions: 'Assinaturas',
@@ -42,7 +49,16 @@ const categoryLabels = {
   others: 'Outros'
 };
 
-const Dashboard = ({ purchases }: DashboardProps) => {
+const Dashboard = ({ purchases, categories = [] }: DashboardProps) => {
+  // Create category labels map from categories prop or use defaults
+  const categoryLabels = categories.reduce((acc, cat) => {
+    acc[cat.name] = cat.label;
+    return acc;
+  }, {} as Record<string, string>);
+
+  // Merge with default labels for backward compatibility
+  const allCategoryLabels = { ...defaultCategoryLabels, ...categoryLabels };
+
   // Calculate total spending
   const totalSpending = purchases.reduce((sum, purchase) => sum + purchase.amount, 0);
 
@@ -53,7 +69,7 @@ const Dashboard = ({ purchases }: DashboardProps) => {
       return acc;
     }, {} as Record<string, number>)
   ).map(([category, amount]) => ({
-    name: categoryLabels[category as keyof typeof categoryLabels] || category,
+    name: allCategoryLabels[category] || category,
     value: amount,
     color: categoryColors[category as keyof typeof categoryColors] || '#6b7280'
   }));
@@ -70,7 +86,6 @@ const Dashboard = ({ purchases }: DashboardProps) => {
     amount
   }));
 
-  // Calculate recent purchases for trend analysis
   const recentPurchases = purchases.slice(-5);
   const previousPurchases = purchases.slice(-10, -5);
   const recentTotal = recentPurchases.reduce((sum, purchase) => sum + purchase.amount, 0);
