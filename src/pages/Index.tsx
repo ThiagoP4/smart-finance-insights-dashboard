@@ -3,8 +3,10 @@ import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Dashboard from '@/components/Dashboard';
 import AddPurchaseForm from '@/components/AddPurchaseForm';
+import AddIncomeForm from '@/components/AddIncomeForm';
 import AddCategoryForm from '@/components/AddCategoryForm';
 import PurchaseTable from '@/components/PurchaseTable';
+import IncomeTable from '@/components/IncomeTable';
 import Login from '@/components/Login';
 
 interface Purchase {
@@ -21,10 +23,20 @@ interface Category {
   label: string;
 }
 
+interface Income {
+  id: string;
+  description: string;
+  amount: number;
+  type: string;
+  date: string;
+  recurring: boolean;
+}
+
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [incomes, setIncomes] = useState<Income[]>([]);
   const [categories, setCategories] = useState<Category[]>([
     { id: 'food', name: 'food', label: 'Alimentícia' },
     { id: 'pharmacy', name: 'pharmacy', label: 'Farmacêutica' },
@@ -46,11 +58,12 @@ const Index = () => {
     }
   }, []);
 
-  // Load purchases and categories from localStorage on component mount
+  // Load purchases, incomes and categories from localStorage on component mount
   useEffect(() => {
     if (isAuthenticated) {
       const savedPurchases = localStorage.getItem('financeAI_purchases');
       const savedCategories = localStorage.getItem('financeAI_categories');
+      const savedIncomes = localStorage.getItem('financeAI_incomes');
       
       if (savedPurchases) {
         setPurchases(JSON.parse(savedPurchases));
@@ -90,6 +103,32 @@ const Index = () => {
         localStorage.setItem('financeAI_purchases', JSON.stringify(samplePurchases));
       }
 
+      if (savedIncomes) {
+        setIncomes(JSON.parse(savedIncomes));
+      } else {
+        // Add sample income data
+        const sampleIncomes: Income[] = [
+          {
+            id: '1',
+            description: 'Salário Janeiro',
+            amount: 5000.00,
+            type: 'salary',
+            date: '2024-06-05',
+            recurring: true
+          },
+          {
+            id: '2',
+            description: 'Freelance Design',
+            amount: 1500.00,
+            type: 'freelance',
+            date: '2024-06-10',
+            recurring: false
+          }
+        ];
+        setIncomes(sampleIncomes);
+        localStorage.setItem('financeAI_incomes', JSON.stringify(sampleIncomes));
+      }
+
       if (savedCategories) {
         setCategories(JSON.parse(savedCategories));
       }
@@ -109,6 +148,13 @@ const Index = () => {
       localStorage.setItem('financeAI_categories', JSON.stringify(categories));
     }
   }, [categories, isAuthenticated]);
+
+  // Save incomes to localStorage whenever incomes change
+  useEffect(() => {
+    if (isAuthenticated) {
+      localStorage.setItem('financeAI_incomes', JSON.stringify(incomes));
+    }
+  }, [incomes, isAuthenticated]);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -141,6 +187,21 @@ const Index = () => {
     setPurchases(prev => prev.filter(purchase => purchase.id !== id));
   };
 
+  const handleAddIncome = (income: Income) => {
+    setIncomes(prev => [...prev, income]);
+    setActiveSection('dashboard');
+  };
+
+  const handleUpdateIncome = (updatedIncome: Income) => {
+    setIncomes(prev => prev.map(income => 
+      income.id === updatedIncome.id ? updatedIncome : income
+    ));
+  };
+
+  const handleDeleteIncome = (id: string) => {
+    setIncomes(prev => prev.filter(income => income.id !== id));
+  };
+
   // If not authenticated, show login screen
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
@@ -149,9 +210,11 @@ const Index = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <Dashboard purchases={purchases} categories={categories} />;
+        return <Dashboard purchases={purchases} incomes={incomes} categories={categories} />;
       case 'add-purchase':
         return <AddPurchaseForm onAddPurchase={handleAddPurchase} categories={categories} />;
+      case 'add-income':
+        return <AddIncomeForm onAddIncome={handleAddIncome} />;
       case 'add-category':
         return <AddCategoryForm onAddCategory={handleAddCategory} onBack={() => setActiveSection('home')} />;
       case 'purchases':
@@ -160,6 +223,12 @@ const Index = () => {
           categories={categories}
           onUpdatePurchase={handleUpdatePurchase}
           onDeletePurchase={handleDeletePurchase}
+        />;
+      case 'incomes':
+        return <IncomeTable 
+          incomes={incomes}
+          onUpdateIncome={handleUpdateIncome}
+          onDeleteIncome={handleDeleteIncome}
         />;
       default:
         return <Hero setActiveSection={setActiveSection} />;
