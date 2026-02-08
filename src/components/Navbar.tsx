@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart, LogOut, FileSpreadsheet, Wallet } from 'lucide-react';
+import { BarChart, LogOut, FileSpreadsheet, Wallet, Tag } from 'lucide-react';
 
 interface NavbarProps {
   activeSection: string;
@@ -12,7 +12,8 @@ const Navbar = ({ activeSection, setActiveSection, onLogout }: NavbarProps) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart },
     { id: 'purchases', label: 'Cadastros', icon: FileSpreadsheet },
-    { id: 'incomes', label: 'Entradas', icon: Wallet }
+    { id: 'incomes', label: 'Entradas', icon: Wallet },
+    { id: 'categories', label: 'Categorias', icon: Tag }
   ];
 
   return (

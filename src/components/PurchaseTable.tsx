@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Search, Edit, Trash2, Filter, FileSpreadsheet, FileText, BarChart3, Plus, Tag } from 'lucide-react';
+import { Search, Edit, Trash2, Filter, FileSpreadsheet, FileText, BarChart3, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportToExcel, exportToCSV, exportToPowerBI } from '@/utils/exportUtils';
 
@@ -32,7 +32,6 @@ interface PurchaseTableProps {
   onUpdatePurchase: (purchase: Purchase) => void;
   onDeletePurchase: (id: string) => void;
   onAddPurchase: (purchase: Purchase) => void;
-  onAddCategory: (category: Category) => void;
 }
 
 const categoryColors = {
@@ -48,7 +47,7 @@ const categoryColors = {
   others: 'bg-gray-500'
 };
 
-const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurchase, onAddPurchase, onAddCategory }: PurchaseTableProps) => {
+const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurchase, onAddPurchase }: PurchaseTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -59,7 +58,6 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showAddPurchase, setShowAddPurchase] = useState(false);
-  const [showAddCategory, setShowAddCategory] = useState(false);
   const [editForm, setEditForm] = useState({
     description: '',
     amount: '',
@@ -71,10 +69,6 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
     amount: '',
     category: '',
     date: new Date().toISOString().split('T')[0]
-  });
-  const [newCategory, setNewCategory] = useState({
-    name: '',
-    label: ''
   });
   const { toast } = useToast();
 
@@ -261,30 +255,6 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
     });
   };
 
-  const handleAddCategory = () => {
-    if (!newCategory.name.trim() || !newCategory.label.trim()) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const category: Category = {
-      id: newCategory.name.toLowerCase().replace(/\s+/g, ''),
-      name: newCategory.name.toLowerCase().replace(/\s+/g, ''),
-      label: newCategory.label.trim()
-    };
-
-    onAddCategory(category);
-    setNewCategory({ name: '', label: '' });
-    setShowAddCategory(false);
-    toast({
-      title: "Categoria cadastrada!",
-      description: "Nova categoria criada com sucesso.",
-    });
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20 px-4">
@@ -363,47 +333,6 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
                     <Button onClick={handleAddPurchase} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                       <Plus className="w-4 h-4 mr-2" />
                       Cadastrar Compra
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog open={showAddCategory} onOpenChange={setShowAddCategory}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center space-x-2">
-                    <Tag className="w-4 h-4" />
-                    <span>Nova Categoria</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Cadastrar Nova Categoria</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 pt-4">
-                    <div>
-                      <Label htmlFor="cat-name">Nome (ID)</Label>
-                      <Input
-                        id="cat-name"
-                        placeholder="Ex: eletronicos"
-                        value={newCategory.name}
-                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Identificador interno (sem espaços)
-                      </p>
-                    </div>
-                    <div>
-                      <Label htmlFor="cat-label">Nome de Exibição</Label>
-                      <Input
-                        id="cat-label"
-                        placeholder="Ex: Eletrônicos"
-                        value={newCategory.label}
-                        onChange={(e) => setNewCategory({ ...newCategory, label: e.target.value })}
-                      />
-                    </div>
-                    <Button onClick={handleAddCategory} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                      <Tag className="w-4 h-4 mr-2" />
-                      Cadastrar Categoria
                     </Button>
                   </div>
                 </DialogContent>
