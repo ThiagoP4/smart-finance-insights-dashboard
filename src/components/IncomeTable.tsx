@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { 
   Search, Filter, Edit2, Trash2, ChevronLeft, ChevronRight, 
-  ArrowUpDown, DollarSign, Calendar, RefreshCw
+  ArrowUpDown, DollarSign, Calendar, RefreshCw, Plus
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 
 interface Income {
@@ -25,6 +26,7 @@ interface IncomeTableProps {
   incomes: Income[];
   onUpdateIncome: (income: Income) => void;
   onDeleteIncome: (id: string) => void;
+  onAddIncome: (income: Income) => void;
 }
 
 const incomeTypes = [
@@ -60,7 +62,7 @@ const typeColors: Record<string, string> = {
   other: 'bg-gray-100 text-gray-700'
 };
 
-const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome }: IncomeTableProps) => {
+const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: IncomeTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterRecurring, setFilterRecurring] = useState('all');
@@ -70,6 +72,14 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome }: IncomeTablePro
   const [showFilters, setShowFilters] = useState(false);
   const [editingIncome, setEditingIncome] = useState<Income | null>(null);
   const [editForm, setEditForm] = useState<Income | null>(null);
+  const [showAddIncome, setShowAddIncome] = useState(false);
+  const [newIncome, setNewIncome] = useState({
+    description: '',
+    amount: '',
+    type: 'salary',
+    date: new Date().toISOString().split('T')[0],
+    recurring: false
+  });
   const { toast } = useToast();
   const itemsPerPage = 10;
 
@@ -154,6 +164,40 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome }: IncomeTablePro
     });
   };
 
+  const handleAddIncome = () => {
+    if (!newIncome.description || !newIncome.amount) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const income: Income = {
+      id: Date.now().toString(),
+      description: newIncome.description,
+      amount: parseFloat(newIncome.amount),
+      type: newIncome.type,
+      date: newIncome.date,
+      recurring: newIncome.recurring
+    };
+
+    onAddIncome(income);
+    setNewIncome({
+      description: '',
+      amount: '',
+      type: 'salary',
+      date: new Date().toISOString().split('T')[0],
+      recurring: false
+    });
+    setShowAddIncome(false);
+    toast({
+      title: "Entrada cadastrada!",
+      description: "Sua entrada foi registrada com sucesso.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 pt-20 px-4">
       <div className="max-w-7xl mx-auto">
@@ -182,6 +226,76 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome }: IncomeTablePro
               </div>
               
               <div className="flex items-center gap-2">
+                <Dialog open={showAddIncome} onOpenChange={setShowAddIncome}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Nova Entrada
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Cadastrar Nova Entrada</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                      <div>
+                        <Label htmlFor="new-income-description">Descrição *</Label>
+                        <Input
+                          id="new-income-description"
+                          placeholder="Ex: Salário, Freelance..."
+                          value={newIncome.description}
+                          onChange={(e) => setNewIncome({ ...newIncome, description: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-income-amount">Valor (R$) *</Label>
+                        <Input
+                          id="new-income-amount"
+                          type="number"
+                          step="0.01"
+                          placeholder="0,00"
+                          value={newIncome.amount}
+                          onChange={(e) => setNewIncome({ ...newIncome, amount: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-income-type">Tipo *</Label>
+                        <Select value={newIncome.type} onValueChange={(value) => setNewIncome({ ...newIncome, type: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {incomeTypes.map((type) => (
+                              <SelectItem key={type.id} value={type.name}>{type.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="new-income-date">Data</Label>
+                        <Input
+                          id="new-income-date"
+                          type="date"
+                          value={newIncome.date}
+                          onChange={(e) => setNewIncome({ ...newIncome, date: e.target.value })}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="new-income-recurring"
+                          checked={newIncome.recurring}
+                          onCheckedChange={(checked) => setNewIncome({ ...newIncome, recurring: checked as boolean })}
+                        />
+                        <Label htmlFor="new-income-recurring">Entrada Recorrente</Label>
+                      </div>
+                      <Button onClick={handleAddIncome} className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Cadastrar Entrada
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
