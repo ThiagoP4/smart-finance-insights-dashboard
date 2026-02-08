@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Dashboard from '@/components/Dashboard';
-import AddPurchaseForm from '@/components/AddPurchaseForm';
-import AddIncomeForm from '@/components/AddIncomeForm';
-import AddCategoryForm from '@/components/AddCategoryForm';
 import PurchaseTable from '@/components/PurchaseTable';
 import IncomeTable from '@/components/IncomeTable';
 import Login from '@/components/Login';
@@ -169,12 +166,10 @@ const Index = () => {
 
   const handleAddPurchase = (purchase: Purchase) => {
     setPurchases(prev => [...prev, purchase]);
-    setActiveSection('dashboard'); // Navigate to dashboard after adding purchase
   };
 
   const handleAddCategory = (category: Category) => {
     setCategories(prev => [...prev, category]);
-    setActiveSection('home'); // Navigate back to home after adding category
   };
 
   const handleUpdatePurchase = (updatedPurchase: Purchase) => {
@@ -189,7 +184,6 @@ const Index = () => {
 
   const handleAddIncome = (income: Income) => {
     setIncomes(prev => [...prev, income]);
-    setActiveSection('dashboard');
   };
 
   const handleUpdateIncome = (updatedIncome: Income) => {
@@ -211,24 +205,21 @@ const Index = () => {
     switch (activeSection) {
       case 'dashboard':
         return <Dashboard purchases={purchases} incomes={incomes} categories={categories} />;
-      case 'add-purchase':
-        return <AddPurchaseForm onAddPurchase={handleAddPurchase} categories={categories} />;
-      case 'add-income':
-        return <AddIncomeForm onAddIncome={handleAddIncome} />;
-      case 'add-category':
-        return <AddCategoryForm onAddCategory={handleAddCategory} onBack={() => setActiveSection('home')} />;
       case 'purchases':
         return <PurchaseTable 
           purchases={purchases} 
           categories={categories}
           onUpdatePurchase={handleUpdatePurchase}
           onDeletePurchase={handleDeletePurchase}
+          onAddPurchase={handleAddPurchase}
+          onAddCategory={handleAddCategory}
         />;
       case 'incomes':
         return <IncomeTable 
           incomes={incomes}
           onUpdateIncome={handleUpdateIncome}
           onDeleteIncome={handleDeleteIncome}
+          onAddIncome={handleAddIncome}
         />;
       default:
         return <Hero setActiveSection={setActiveSection} />;
