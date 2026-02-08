@@ -4,6 +4,7 @@ import Hero from '@/components/Hero';
 import Dashboard from '@/components/Dashboard';
 import PurchaseTable from '@/components/PurchaseTable';
 import IncomeTable from '@/components/IncomeTable';
+import CategoryTable from '@/components/CategoryTable';
 import Login from '@/components/Login';
 
 interface Purchase {
@@ -172,6 +173,16 @@ const Index = () => {
     setCategories(prev => [...prev, category]);
   };
 
+  const handleUpdateCategory = (updatedCategory: Category) => {
+    setCategories(prev => prev.map(category => 
+      category.id === updatedCategory.id ? updatedCategory : category
+    ));
+  };
+
+  const handleDeleteCategory = (id: string) => {
+    setCategories(prev => prev.filter(category => category.id !== id));
+  };
+
   const handleUpdatePurchase = (updatedPurchase: Purchase) => {
     setPurchases(prev => prev.map(purchase => 
       purchase.id === updatedPurchase.id ? updatedPurchase : purchase
@@ -212,7 +223,6 @@ const Index = () => {
           onUpdatePurchase={handleUpdatePurchase}
           onDeletePurchase={handleDeletePurchase}
           onAddPurchase={handleAddPurchase}
-          onAddCategory={handleAddCategory}
         />;
       case 'incomes':
         return <IncomeTable 
@@ -220,6 +230,13 @@ const Index = () => {
           onUpdateIncome={handleUpdateIncome}
           onDeleteIncome={handleDeleteIncome}
           onAddIncome={handleAddIncome}
+        />;
+      case 'categories':
+        return <CategoryTable 
+          categories={categories}
+          onAddCategory={handleAddCategory}
+          onUpdateCategory={handleUpdateCategory}
+          onDeleteCategory={handleDeleteCategory}
         />;
       default:
         return <Hero setActiveSection={setActiveSection} />;
