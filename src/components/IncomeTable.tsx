@@ -41,25 +41,20 @@ const incomeTypes = [
 ];
 
 const typeLabels: Record<string, string> = {
-  salary: 'Salário',
-  freelance: 'Freelance',
-  investment: 'Investimentos',
-  rental: 'Aluguel',
-  bonus: 'Bônus',
-  gift: 'Presente/Doação',
-  refund: 'Reembolso',
-  other: 'Outros'
+  salary: 'Salário', freelance: 'Freelance', investment: 'Investimentos',
+  rental: 'Aluguel', bonus: 'Bônus', gift: 'Presente/Doação',
+  refund: 'Reembolso', other: 'Outros'
 };
 
 const typeColors: Record<string, string> = {
-  salary: 'bg-emerald-100 text-emerald-700',
-  freelance: 'bg-blue-100 text-blue-700',
-  investment: 'bg-purple-100 text-purple-700',
-  rental: 'bg-orange-100 text-orange-700',
-  bonus: 'bg-yellow-100 text-yellow-700',
-  gift: 'bg-pink-100 text-pink-700',
-  refund: 'bg-cyan-100 text-cyan-700',
-  other: 'bg-gray-100 text-gray-700'
+  salary: 'bg-emerald-500/20 text-emerald-400',
+  freelance: 'bg-blue-500/20 text-blue-400',
+  investment: 'bg-purple-500/20 text-purple-400',
+  rental: 'bg-orange-500/20 text-orange-400',
+  bonus: 'bg-yellow-500/20 text-yellow-400',
+  gift: 'bg-pink-500/20 text-pink-400',
+  refund: 'bg-cyan-500/20 text-cyan-400',
+  other: 'bg-muted text-muted-foreground'
 };
 
 const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: IncomeTableProps) => {
@@ -74,50 +69,24 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: I
   const [editForm, setEditForm] = useState<Income | null>(null);
   const [showAddIncome, setShowAddIncome] = useState(false);
   const [newIncome, setNewIncome] = useState({
-    description: '',
-    amount: '',
-    type: 'salary',
-    date: new Date().toISOString().split('T')[0],
-    recurring: false
+    description: '', amount: '', type: 'salary',
+    date: new Date().toISOString().split('T')[0], recurring: false
   });
   const { toast } = useToast();
   const itemsPerPage = 10;
 
   const filteredAndSortedIncomes = useMemo(() => {
     let result = [...incomes];
-
-    // Filter by search
-    if (searchTerm) {
-      result = result.filter(income =>
-        income.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by type
-    if (filterType !== 'all') {
-      result = result.filter(income => income.type === filterType);
-    }
-
-    // Filter by recurring
-    if (filterRecurring !== 'all') {
-      result = result.filter(income => 
-        filterRecurring === 'recurring' ? income.recurring : !income.recurring
-      );
-    }
-
-    // Sort
+    if (searchTerm) result = result.filter(income => income.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (filterType !== 'all') result = result.filter(income => income.type === filterType);
+    if (filterRecurring !== 'all') result = result.filter(income => filterRecurring === 'recurring' ? income.recurring : !income.recurring);
     result.sort((a, b) => {
       let comparison = 0;
-      if (sortField === 'date') {
-        comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-      } else if (sortField === 'amount') {
-        comparison = a.amount - b.amount;
-      } else if (sortField === 'description') {
-        comparison = a.description.localeCompare(b.description);
-      }
+      if (sortField === 'date') comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+      else if (sortField === 'amount') comparison = a.amount - b.amount;
+      else if (sortField === 'description') comparison = a.description.localeCompare(b.description);
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-
     return result;
   }, [incomes, searchTerm, filterType, filterRecurring, sortField, sortDirection]);
 
@@ -130,96 +99,63 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: I
   const totalAmount = filteredAndSortedIncomes.reduce((sum, income) => sum + income.amount, 0);
 
   const handleSort = (field: 'date' | 'amount' | 'description') => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
+    if (sortField === field) setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortDirection('desc'); }
   };
 
-  const handleEdit = (income: Income) => {
-    setEditingIncome(income);
-    setEditForm({ ...income });
-  };
+  const handleEdit = (income: Income) => { setEditingIncome(income); setEditForm({ ...income }); };
 
   const handleSaveEdit = () => {
     if (editForm) {
       onUpdateIncome(editForm);
-      setEditingIncome(null);
-      setEditForm(null);
-      toast({
-        title: "Entrada atualizada!",
-        description: "As informações foram salvas com sucesso.",
-      });
+      setEditingIncome(null); setEditForm(null);
+      toast({ title: "Entrada atualizada!", description: "As informações foram salvas com sucesso." });
     }
   };
 
   const handleDelete = (id: string) => {
     onDeleteIncome(id);
-    toast({
-      title: "Entrada excluída!",
-      description: "A entrada foi removida com sucesso.",
-      variant: "destructive",
-    });
+    toast({ title: "Entrada excluída!", description: "A entrada foi removida com sucesso.", variant: "destructive" });
   };
 
   const handleAddIncome = () => {
     if (!newIncome.description || !newIncome.amount) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro", description: "Por favor, preencha todos os campos obrigatórios.", variant: "destructive" });
       return;
     }
-
     const income: Income = {
-      id: Date.now().toString(),
-      description: newIncome.description,
-      amount: parseFloat(newIncome.amount),
-      type: newIncome.type,
-      date: newIncome.date,
-      recurring: newIncome.recurring
+      id: Date.now().toString(), description: newIncome.description,
+      amount: parseFloat(newIncome.amount), type: newIncome.type,
+      date: newIncome.date, recurring: newIncome.recurring
     };
-
     onAddIncome(income);
-    setNewIncome({
-      description: '',
-      amount: '',
-      type: 'salary',
-      date: new Date().toISOString().split('T')[0],
-      recurring: false
-    });
+    setNewIncome({ description: '', amount: '', type: 'salary', date: new Date().toISOString().split('T')[0], recurring: false });
     setShowAddIncome(false);
-    toast({
-      title: "Entrada cadastrada!",
-      description: "Sua entrada foi registrada com sucesso.",
-    });
+    toast({ title: "Entrada cadastrada!", description: "Sua entrada foi registrada com sucesso." });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 pt-20 px-4">
+    <div className="min-h-screen bg-background pt-20 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-2">
             Entradas
           </h1>
-          <p className="text-gray-600">Gerencie suas receitas e rendas</p>
+          <p className="text-muted-foreground">Gerencie suas receitas e rendas</p>
         </div>
 
-        <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
-          <CardHeader className="border-b border-gray-100">
+        <Card className="shadow-xl border-border bg-card">
+          <CardHeader className="border-b border-border">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center gap-4">
-                <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
+                <CardTitle className="text-xl text-foreground flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-emerald-500" />
                   Minhas Entradas
                 </CardTitle>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="font-medium">{filteredAndSortedIncomes.length} registros</span>
                   <span>•</span>
-                  <span className="font-bold text-emerald-600">
+                  <span className="font-bold text-emerald-500">
                     R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -234,58 +170,31 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: I
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Cadastrar Nova Entrada</DialogTitle>
-                    </DialogHeader>
+                    <DialogHeader><DialogTitle>Cadastrar Nova Entrada</DialogTitle></DialogHeader>
                     <div className="space-y-4 pt-4">
                       <div>
                         <Label htmlFor="new-income-description">Descrição *</Label>
-                        <Input
-                          id="new-income-description"
-                          placeholder="Ex: Salário, Freelance..."
-                          value={newIncome.description}
-                          onChange={(e) => setNewIncome({ ...newIncome, description: e.target.value })}
-                        />
+                        <Input id="new-income-description" placeholder="Ex: Salário, Freelance..." value={newIncome.description} onChange={(e) => setNewIncome({ ...newIncome, description: e.target.value })} />
                       </div>
                       <div>
                         <Label htmlFor="new-income-amount">Valor (R$) *</Label>
-                        <Input
-                          id="new-income-amount"
-                          type="number"
-                          step="0.01"
-                          placeholder="0,00"
-                          value={newIncome.amount}
-                          onChange={(e) => setNewIncome({ ...newIncome, amount: e.target.value })}
-                        />
+                        <Input id="new-income-amount" type="number" step="0.01" placeholder="0,00" value={newIncome.amount} onChange={(e) => setNewIncome({ ...newIncome, amount: e.target.value })} />
                       </div>
                       <div>
                         <Label htmlFor="new-income-type">Tipo *</Label>
                         <Select value={newIncome.type} onValueChange={(value) => setNewIncome({ ...newIncome, type: value })}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um tipo" />
-                          </SelectTrigger>
+                          <SelectTrigger><SelectValue placeholder="Selecione um tipo" /></SelectTrigger>
                           <SelectContent>
-                            {incomeTypes.map((type) => (
-                              <SelectItem key={type.id} value={type.name}>{type.label}</SelectItem>
-                            ))}
+                            {incomeTypes.map((type) => (<SelectItem key={type.id} value={type.name}>{type.label}</SelectItem>))}
                           </SelectContent>
                         </Select>
                       </div>
                       <div>
                         <Label htmlFor="new-income-date">Data</Label>
-                        <Input
-                          id="new-income-date"
-                          type="date"
-                          value={newIncome.date}
-                          onChange={(e) => setNewIncome({ ...newIncome, date: e.target.value })}
-                        />
+                        <Input id="new-income-date" type="date" value={newIncome.date} onChange={(e) => setNewIncome({ ...newIncome, date: e.target.value })} />
                       </div>
                       <div className="flex items-center gap-2">
-                        <Checkbox
-                          id="new-income-recurring"
-                          checked={newIncome.recurring}
-                          onCheckedChange={(checked) => setNewIncome({ ...newIncome, recurring: checked as boolean })}
-                        />
+                        <Checkbox id="new-income-recurring" checked={newIncome.recurring} onCheckedChange={(checked) => setNewIncome({ ...newIncome, recurring: checked as boolean })} />
                         <Label htmlFor="new-income-recurring">Entrada Recorrente</Label>
                       </div>
                       <Button onClick={handleAddIncome} className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700">
@@ -297,47 +206,31 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: I
                 </Dialog>
 
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="Buscar entradas..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-64"
-                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input placeholder="Buscar entradas..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 w-64" />
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={showFilters ? 'bg-emerald-50 border-emerald-300' : ''}
-                >
+                <Button variant="outline" size="icon" onClick={() => setShowFilters(!showFilters)} className={showFilters ? 'bg-accent border-accent' : ''}>
                   <Filter className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
             {showFilters && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="mt-4 p-4 bg-muted rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm text-gray-600 mb-2 block">Tipo</Label>
+                  <Label className="text-sm text-muted-foreground mb-2 block">Tipo</Label>
                   <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos os tipos" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Todos os tipos" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos os tipos</SelectItem>
-                      {incomeTypes.map(type => (
-                        <SelectItem key={type.id} value={type.name}>{type.label}</SelectItem>
-                      ))}
+                      {incomeTypes.map(type => (<SelectItem key={type.id} value={type.name}>{type.label}</SelectItem>))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-sm text-gray-600 mb-2 block">Recorrência</Label>
+                  <Label className="text-sm text-muted-foreground mb-2 block">Recorrência</Label>
                   <Select value={filterRecurring} onValueChange={setFilterRecurring}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todas</SelectItem>
                       <SelectItem value="recurring">Recorrentes</SelectItem>
@@ -353,34 +246,16 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: I
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50/50">
-                    <TableHead 
-                      className="cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => handleSort('description')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Descrição
-                        <ArrowUpDown className="w-3 h-3" />
-                      </div>
+                  <TableRow>
+                    <TableHead className="cursor-pointer hover:bg-accent transition-colors" onClick={() => handleSort('description')}>
+                      <div className="flex items-center gap-1">Descrição<ArrowUpDown className="w-3 h-3" /></div>
                     </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => handleSort('amount')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Valor
-                        <ArrowUpDown className="w-3 h-3" />
-                      </div>
+                    <TableHead className="cursor-pointer hover:bg-accent transition-colors" onClick={() => handleSort('amount')}>
+                      <div className="flex items-center gap-1">Valor<ArrowUpDown className="w-3 h-3" /></div>
                     </TableHead>
                     <TableHead>Tipo</TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => handleSort('date')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Data
-                        <ArrowUpDown className="w-3 h-3" />
-                      </div>
+                    <TableHead className="cursor-pointer hover:bg-accent transition-colors" onClick={() => handleSort('date')}>
+                      <div className="flex items-center gap-1">Data<ArrowUpDown className="w-3 h-3" /></div>
                     </TableHead>
                     <TableHead>Recorrente</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
@@ -389,116 +264,69 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: I
                 <TableBody>
                   {paginatedIncomes.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-gray-500">
-                        <DollarSign className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                        <DollarSign className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
                         <p className="text-lg font-medium">Nenhuma entrada encontrada</p>
                         <p className="text-sm">Cadastre suas entradas para visualizá-las aqui</p>
                       </TableCell>
                     </TableRow>
                   ) : (
                     paginatedIncomes.map((income) => (
-                      <TableRow key={income.id} className="hover:bg-emerald-50/30 transition-colors">
+                      <TableRow key={income.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="font-medium">{income.description}</TableCell>
-                        <TableCell className="font-bold text-emerald-600">
+                        <TableCell className="font-bold text-emerald-500">
                           R$ {income.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${typeColors[income.type] || 'bg-gray-100 text-gray-700'}`}>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${typeColors[income.type] || 'bg-muted text-muted-foreground'}`}>
                             {typeLabels[income.type] || income.type}
                           </span>
                         </TableCell>
                         <TableCell className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-gray-400" />
+                          <Calendar className="w-3 h-3 text-muted-foreground" />
                           {new Date(income.date).toLocaleDateString('pt-BR')}
                         </TableCell>
                         <TableCell>
                           {income.recurring ? (
-                            <span className="flex items-center gap-1 text-emerald-600">
-                              <RefreshCw className="w-3 h-3" />
-                              Sim
+                            <span className="flex items-center gap-1 text-emerald-500">
+                              <RefreshCw className="w-3 h-3" />Sim
                             </span>
                           ) : (
-                            <span className="text-gray-400">Não</span>
+                            <span className="text-muted-foreground">Não</span>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Dialog>
+                          <div className="flex items-center justify-end gap-2">
+                            <Dialog open={editingIncome?.id === income.id} onOpenChange={(open) => !open && setEditingIncome(null)}>
                               <DialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  onClick={() => handleEdit(income)}
-                                >
+                                <Button variant="ghost" size="icon" onClick={() => handleEdit(income)} className="hover:bg-accent">
                                   <Edit2 className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Editar Entrada</DialogTitle>
-                                </DialogHeader>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader><DialogTitle>Editar Entrada</DialogTitle></DialogHeader>
                                 {editForm && (
                                   <div className="space-y-4 pt-4">
-                                    <div>
-                                      <Label>Descrição</Label>
-                                      <Input
-                                        value={editForm.description}
-                                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label>Valor</Label>
-                                      <Input
-                                        type="number"
-                                        step="0.01"
-                                        value={editForm.amount}
-                                        onChange={(e) => setEditForm({ ...editForm, amount: parseFloat(e.target.value) })}
-                                      />
-                                    </div>
+                                    <div><Label>Descrição</Label><Input value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} /></div>
+                                    <div><Label>Valor (R$)</Label><Input type="number" step="0.01" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: parseFloat(e.target.value) })} /></div>
                                     <div>
                                       <Label>Tipo</Label>
                                       <Select value={editForm.type} onValueChange={(value) => setEditForm({ ...editForm, type: value })}>
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {incomeTypes.map(type => (
-                                            <SelectItem key={type.id} value={type.name}>{type.label}</SelectItem>
-                                          ))}
-                                        </SelectContent>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>{incomeTypes.map((type) => (<SelectItem key={type.id} value={type.name}>{type.label}</SelectItem>))}</SelectContent>
                                       </Select>
                                     </div>
-                                    <div>
-                                      <Label>Data</Label>
-                                      <Input
-                                        type="date"
-                                        value={editForm.date}
-                                        onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                                      />
-                                    </div>
+                                    <div><Label>Data</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
                                     <div className="flex items-center gap-2">
-                                      <input
-                                        type="checkbox"
-                                        checked={editForm.recurring}
-                                        onChange={(e) => setEditForm({ ...editForm, recurring: e.target.checked })}
-                                        className="w-4 h-4"
-                                      />
+                                      <Checkbox checked={editForm.recurring} onCheckedChange={(checked) => setEditForm({ ...editForm, recurring: checked as boolean })} />
                                       <Label>Recorrente</Label>
                                     </div>
-                                    <Button onClick={handleSaveEdit} className="w-full bg-emerald-600 hover:bg-emerald-700">
-                                      Salvar Alterações
-                                    </Button>
+                                    <Button onClick={handleSaveEdit} className="w-full">Salvar Alterações</Button>
                                   </div>
                                 )}
                               </DialogContent>
                             </Dialog>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => handleDelete(income.id)}
-                            >
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(income.id)} className="hover:bg-destructive/10 hover:text-destructive">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -511,28 +339,16 @@ const IncomeTable = ({ incomes, onUpdateIncome, onDeleteIncome, onAddIncome }: I
             </div>
 
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                <p className="text-sm text-gray-600">
+              <div className="flex items-center justify-between px-6 py-4 border-t border-border">
+                <p className="text-sm text-muted-foreground">
                   Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, filteredAndSortedIncomes.length)} de {filteredAndSortedIncomes.length}
                 </p>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  <span className="text-sm text-gray-600">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                  >
+                  <span className="text-sm text-muted-foreground">Página {currentPage} de {totalPages}</span>
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
