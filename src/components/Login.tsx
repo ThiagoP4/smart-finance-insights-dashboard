@@ -25,10 +25,10 @@ const Login = ({ onLogin }: LoginProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-purple-100/20"></div>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-purple-600/5"></div>
       
-      <Card className="w-full max-w-md relative bg-white/80 backdrop-blur-sm shadow-xl border-white/20">
+      <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-sm shadow-xl border-border/50">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg">
@@ -38,7 +38,7 @@ const Login = ({ onLogin }: LoginProps) => {
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             FinanceAI Login
           </CardTitle>
-          <p className="text-gray-600">Entre para acessar seu painel financeiro</p>
+          <p className="text-muted-foreground">Entre para acessar seu painel financeiro</p>
         </CardHeader>
         
         <CardContent>
@@ -50,7 +50,6 @@ const Login = ({ onLogin }: LoginProps) => {
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/70"
               />
             </div>
             
@@ -61,12 +60,11 @@ const Login = ({ onLogin }: LoginProps) => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-white/70"
               />
             </div>
             
             {error && (
-              <p className="text-red-500 text-sm text-center">{error}</p>
+              <p className="text-destructive text-sm text-center">{error}</p>
             )}
             
             <Button
@@ -78,9 +76,9 @@ const Login = ({ onLogin }: LoginProps) => {
             </Button>
           </form>
           
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800 text-center">
-              <strong>Credenciais de teste:</strong><br />
+          <div className="mt-6 p-4 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground text-center">
+              <strong className="text-foreground">Credenciais de teste:</strong><br />
               Email: admin<br />
               Senha: admin
             </p>
