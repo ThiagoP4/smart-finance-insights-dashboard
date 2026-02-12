@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, FileSpreadsheet, Wallet, Tag, Sparkles, Menu, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { BarChart, FileSpreadsheet, Sparkles, Menu, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import AppSidebar from './AppSidebar';
 
 interface NavbarProps {
@@ -32,9 +32,7 @@ const Navbar = ({ activeSection, setActiveSection, onLogout, selectedMonth, sele
   };
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart },
-    { id: 'purchases', label: 'Cadastros', icon: FileSpreadsheet },
-    { id: 'incomes', label: 'Entradas', icon: Wallet },
-    { id: 'categories', label: 'Categorias', icon: Tag },
+    { id: 'registros', label: 'Registros', icon: FileSpreadsheet },
     { id: 'ai-mode', label: 'Modo IA', icon: Sparkles },
   ];
 
