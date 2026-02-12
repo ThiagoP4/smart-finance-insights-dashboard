@@ -15,6 +15,7 @@ const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Jul
 
 const Navbar = ({ activeSection, setActiveSection, onLogout, selectedMonth, selectedYear, onMonthChange }: NavbarProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [viewYear, setViewYear] = useState(selectedYear);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart },
@@ -22,10 +23,8 @@ const Navbar = ({ activeSection, setActiveSection, onLogout, selectedMonth, sele
     { id: 'ai-mode', label: 'Modo IA', icon: Sparkles },
   ];
 
-  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
-
-  const selectMonth = (month: number, year: number) => {
-    onMonthChange(month, year);
+  const selectMonth = (month: number) => {
+    onMonthChange(month, viewYear);
     setDropdownOpen(false);
   };
 
@@ -92,30 +91,36 @@ const Navbar = ({ activeSection, setActiveSection, onLogout, selectedMonth, sele
             {dropdownOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                <div className="absolute right-0 mt-2 w-64 bg-popover border border-border rounded-xl shadow-xl z-50 p-3">
-                  {years.map((year) => (
-                    <div key={year} className="mb-2 last:mb-0">
-                      <div className="text-xs font-semibold text-muted-foreground px-2 py-1">{year}</div>
-                      <div className="grid grid-cols-4 gap-1">
-                        {MONTHS.map((month, i) => {
-                          const isSelected = selectedMonth === i && selectedYear === year;
-                          return (
-                            <button
-                              key={`${year}-${i}`}
-                              onClick={() => selectMonth(i, year)}
-                              className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                                isSelected
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'text-foreground hover:bg-accent'
-                              }`}
-                            >
-                              {month.slice(0, 3)}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                <div className="absolute right-0 mt-2 w-56 bg-popover border border-border rounded-xl shadow-xl z-50 p-3">
+                  {/* Year selector */}
+                  <div className="flex items-center justify-between mb-3 px-1">
+                    <button onClick={() => setViewYear(y => y - 1)} className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                      <ChevronDown className="w-4 h-4 rotate-90" />
+                    </button>
+                    <span className="text-sm font-semibold text-foreground">{viewYear}</span>
+                    <button onClick={() => setViewYear(y => y + 1)} className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                      <ChevronDown className="w-4 h-4 -rotate-90" />
+                    </button>
+                  </div>
+                  {/* Month grid */}
+                  <div className="grid grid-cols-3 gap-1">
+                    {MONTHS.map((month, i) => {
+                      const isSelected = selectedMonth === i && selectedYear === viewYear;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => selectMonth(i)}
+                          className={`px-2 py-2 rounded-lg text-xs font-medium transition-colors ${
+                            isSelected
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-foreground hover:bg-accent'
+                          }`}
+                        >
+                          {month.slice(0, 3)}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </>
             )}
