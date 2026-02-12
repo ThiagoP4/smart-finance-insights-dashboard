@@ -1,14 +1,35 @@
 import React from 'react';
-import { BarChart, FileSpreadsheet, Wallet, Tag, Sparkles, Menu } from 'lucide-react';
+import { BarChart, FileSpreadsheet, Wallet, Tag, Sparkles, Menu, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import AppSidebar from './AppSidebar';
 
 interface NavbarProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
   onLogout: () => void;
+  selectedMonth: number;
+  selectedYear: number;
+  onMonthChange: (month: number, year: number) => void;
 }
 
-const Navbar = ({ activeSection, setActiveSection, onLogout }: NavbarProps) => {
+const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+const Navbar = ({ activeSection, setActiveSection, onLogout, selectedMonth, selectedYear, onMonthChange }: NavbarProps) => {
+
+  const goToPrevMonth = () => {
+    if (selectedMonth === 0) {
+      onMonthChange(11, selectedYear - 1);
+    } else {
+      onMonthChange(selectedMonth - 1, selectedYear);
+    }
+  };
+
+  const goToNextMonth = () => {
+    if (selectedMonth === 11) {
+      onMonthChange(0, selectedYear + 1);
+    } else {
+      onMonthChange(selectedMonth + 1, selectedYear);
+    }
+  };
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart },
     { id: 'purchases', label: 'Cadastros', icon: FileSpreadsheet },
@@ -34,6 +55,21 @@ const Navbar = ({ activeSection, setActiveSection, onLogout }: NavbarProps) => {
             >
               Finance AI
             </button>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-1 bg-secondary/50 rounded-lg px-2 py-1">
+              <CalendarDays className="w-4 h-4 text-muted-foreground mr-1" />
+              <button onClick={goToPrevMonth} className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm font-medium text-foreground min-w-[100px] text-center">
+                {MONTHS[selectedMonth]} {selectedYear}
+              </span>
+              <button onClick={goToNextMonth} className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="hidden md:flex space-x-2">
@@ -65,7 +101,19 @@ const Navbar = ({ activeSection, setActiveSection, onLogout }: NavbarProps) => {
         </div>
 
         {/* Mobile menu */}
-        <div className="md:hidden pb-3">
+        <div className="md:hidden pb-3 space-y-2">
+          <div className="flex items-center justify-center gap-1 bg-secondary/50 rounded-lg px-2 py-1">
+            <CalendarDays className="w-4 h-4 text-muted-foreground mr-1" />
+            <button onClick={goToPrevMonth} className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-sm font-medium text-foreground min-w-[100px] text-center">
+              {MONTHS[selectedMonth]} {selectedYear}
+            </span>
+            <button onClick={goToNextMonth} className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
           <div className="flex space-x-2 overflow-x-auto">
             {navItems.map((item) => {
               const Icon = item.icon;

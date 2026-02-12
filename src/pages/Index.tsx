@@ -34,6 +34,13 @@ interface Income {
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  const handleMonthChange = (month: number, year: number) => {
+    setSelectedMonth(month);
+    setSelectedYear(year);
+  };
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [categories, setCategories] = useState<Category[]>([
@@ -252,6 +259,9 @@ const Index = () => {
         activeSection={activeSection} 
         setActiveSection={setActiveSection} 
         onLogout={handleLogout}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+        onMonthChange={handleMonthChange}
       />
       {renderContent()}
     </div>
