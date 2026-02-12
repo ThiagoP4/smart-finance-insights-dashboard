@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Dashboard from '@/components/Dashboard';
-import PurchaseTable from '@/components/PurchaseTable';
-import IncomeTable from '@/components/IncomeTable';
-import CategoryTable from '@/components/CategoryTable';
+import RegistrosScreen from '@/components/RegistrosScreen';
 import AIChatMode from '@/components/AIChatMode';
 import Login from '@/components/Login';
 
@@ -224,28 +222,23 @@ const Index = () => {
     switch (activeSection) {
       case 'dashboard':
         return <Dashboard purchases={purchases} incomes={incomes} categories={categories} />;
-      case 'purchases':
-        return <PurchaseTable 
-          purchases={purchases} 
-          categories={categories}
-          onUpdatePurchase={handleUpdatePurchase}
-          onDeletePurchase={handleDeletePurchase}
-          onAddPurchase={handleAddPurchase}
-        />;
-      case 'incomes':
-        return <IncomeTable 
-          incomes={incomes}
-          onUpdateIncome={handleUpdateIncome}
-          onDeleteIncome={handleDeleteIncome}
-          onAddIncome={handleAddIncome}
-        />;
-      case 'categories':
-        return <CategoryTable 
-          categories={categories}
-          onAddCategory={handleAddCategory}
-          onUpdateCategory={handleUpdateCategory}
-          onDeleteCategory={handleDeleteCategory}
-        />;
+      case 'registros':
+        return (
+          <RegistrosScreen
+            purchases={purchases}
+            categories={categories}
+            incomes={incomes}
+            onUpdatePurchase={handleUpdatePurchase}
+            onDeletePurchase={handleDeletePurchase}
+            onAddPurchase={handleAddPurchase}
+            onUpdateIncome={handleUpdateIncome}
+            onDeleteIncome={handleDeleteIncome}
+            onAddIncome={handleAddIncome}
+            onAddCategory={handleAddCategory}
+            onUpdateCategory={handleUpdateCategory}
+            onDeleteCategory={handleDeleteCategory}
+          />
+        );
       case 'ai-mode':
         return <AIChatMode />;
       default:
