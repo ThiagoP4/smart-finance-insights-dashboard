@@ -5,6 +5,7 @@ import Dashboard from '@/components/Dashboard';
 import RegistrosScreen from '@/components/RegistrosScreen';
 import AIChatMode from '@/components/AIChatMode';
 import Login from '@/components/Login';
+import ProfileScreen from '@/components/ProfileScreen';
 
 interface Purchase {
   id: string;
