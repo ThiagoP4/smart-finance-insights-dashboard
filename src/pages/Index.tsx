@@ -228,6 +228,8 @@ const Index = () => {
             purchases={purchases}
             categories={categories}
             incomes={incomes}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
             onUpdatePurchase={handleUpdatePurchase}
             onDeletePurchase={handleDeletePurchase}
             onAddPurchase={handleAddPurchase}
