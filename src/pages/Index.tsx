@@ -244,6 +244,8 @@ const Index = () => {
         );
       case 'ai-mode':
         return <AIChatMode />;
+      case 'profile':
+        return <ProfileScreen />;
       default:
         return <Hero setActiveSection={setActiveSection} />;
     }
