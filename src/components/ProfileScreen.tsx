@@ -144,7 +144,7 @@ const ProfileScreen = () => {
                   onChange={handleCPFChange}
                   className={`pr-9 ${cpfInvalid ? 'border-destructive focus-visible:ring-destructive' : cpfValid ? 'border-success focus-visible:ring-success' : ''}`}
                 />
-                {cpfValid && <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(142,71%,45%)]" />}
+                {cpfValid && <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />}
                 {cpfInvalid && <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />}
               </div>
               {errors.cpf && (
