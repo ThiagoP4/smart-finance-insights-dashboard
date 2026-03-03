@@ -32,6 +32,8 @@ interface RegistrosScreenProps {
   purchases: Purchase[];
   categories: Category[];
   incomes: Income[];
+  selectedMonth: number;
+  selectedYear: number;
   onUpdatePurchase: (purchase: Purchase) => void;
   onDeletePurchase: (id: string) => void;
   onAddPurchase: (purchase: Purchase) => void;
