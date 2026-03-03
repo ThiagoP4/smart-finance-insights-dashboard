@@ -18,12 +18,12 @@ interface AppSidebarProps {
   children: React.ReactNode;
 }
 
-const AppSidebar = ({ onLogout, children }: AppSidebarProps) => {
+const AppSidebar = ({ onLogout, onNavigate, children }: AppSidebarProps) => {
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
   const menuItems = [
-    { icon: User, label: 'Meu Perfil', action: () => {} },
+    { icon: User, label: 'Meu Perfil', action: () => onNavigate('profile') },
     { icon: Settings, label: 'Configurações', action: () => {} },
     { icon: HelpCircle, label: 'Ajuda', action: () => {} },
     { icon: Info, label: 'Sobre', action: () => {} },
