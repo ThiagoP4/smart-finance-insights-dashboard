@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 
 interface AppSidebarProps {
   onLogout: () => void;
+  onNavigate: (section: string) => void;
   children: React.ReactNode;
 }
 
