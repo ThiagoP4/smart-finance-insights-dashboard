@@ -3,6 +3,7 @@ import { FileSpreadsheet, Wallet, Tag, ChevronLeft, ChevronRight } from 'lucide-
 import PurchaseTable from './PurchaseTable';
 import IncomeTable from './IncomeTable';
 import CategoryTable from './CategoryTable';
+import ExcelModal from './ExcelModal';
 
 interface Purchase {
   id: string;
