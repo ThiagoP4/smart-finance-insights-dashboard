@@ -53,6 +53,7 @@ const tabs = [
 
 const RegistrosScreen = ({
   purchases, categories, incomes,
+  selectedMonth, selectedYear,
   onUpdatePurchase, onDeletePurchase, onAddPurchase,
   onUpdateIncome, onDeleteIncome, onAddIncome,
   onAddCategory, onUpdateCategory, onDeleteCategory,
