@@ -61,6 +61,14 @@ const RegistrosScreen = ({
   const [activeTab, setActiveTab] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
+  const handleImportPurchases = (imported: Purchase[]) => {
+    imported.forEach(p => onAddPurchase(p));
+  };
+
+  const handleImportIncomes = (imported: Income[]) => {
+    imported.forEach(i => onAddIncome(i));
+  };
+
   const goTo = (index: number) => {
     if (index >= 0 && index < tabs.length) setActiveTab(index);
   };
@@ -118,6 +126,7 @@ const RegistrosScreen = ({
       {/* Sub-tab navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
         <div className="flex items-center gap-2">
+          {/* Left arrow */}
           <button
             onClick={() => goTo(activeTab - 1)}
             disabled={activeTab === 0}
@@ -126,6 +135,7 @@ const RegistrosScreen = ({
             <ChevronLeft className="w-5 h-5" />
           </button>
 
+          {/* Tabs */}
           <div className="flex-1 flex items-center justify-center gap-1 sm:gap-2">
             {tabs.map((tab, index) => {
               const Icon = tab.icon;
@@ -147,6 +157,7 @@ const RegistrosScreen = ({
             })}
           </div>
 
+          {/* Right arrow */}
           <button
             onClick={() => goTo(activeTab + 1)}
             disabled={activeTab === tabs.length - 1}
@@ -154,6 +165,19 @@ const RegistrosScreen = ({
           >
             <ChevronRight className="w-5 h-5" />
           </button>
+
+          {/* Excel button */}
+          <div className="ml-1">
+            <ExcelModal
+              purchases={purchases}
+              incomes={incomes}
+              categories={categories}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              onImportPurchases={handleImportPurchases}
+              onImportIncomes={handleImportIncomes}
+            />
+          </div>
         </div>
 
         {/* Dot indicators */}
