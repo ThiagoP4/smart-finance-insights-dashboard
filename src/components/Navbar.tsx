@@ -34,7 +34,7 @@ const Navbar = ({ activeSection, setActiveSection, onLogout, selectedMonth, sele
         <div className="flex items-center h-16">
           {/* Left: Menu + Logo */}
           <div className="flex items-center gap-3 flex-shrink-0">
-            <AppSidebar onLogout={onLogout}>
+            <AppSidebar onLogout={onLogout} onNavigate={setActiveSection}>
               <button className="p-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                 <Menu className="w-5 h-5" />
               </button>
