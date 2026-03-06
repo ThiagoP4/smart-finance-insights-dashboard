@@ -11,6 +11,38 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Search, Edit, Trash2, Filter, FileSpreadsheet, FileText, BarChart3, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportToExcel, exportToCSV, exportToPowerBI } from '@/utils/exportUtils';
+import { matchBrand, getBrandLogo, SUBSCRIPTIONS, type Brand } from '@/utils/brandMap';
+
+/** Mini logo for a purchase description */
+const DescriptionLogo = ({ description }: { description: string }) => {
+  const brand = matchBrand(description);
+  const [err, setErr] = useState(false);
+  if (!brand || err) return null;
+  return (
+    <img
+      src={getBrandLogo(brand.domain)}
+      alt={brand.name}
+      className="w-5 h-5 rounded object-contain bg-white shrink-0"
+      onError={() => setErr(true)}
+    />
+  );
+};
+
+const SubscriptionChip = ({ brand, onSelect }: { brand: Brand; onSelect: () => void }) => {
+  const [err, setErr] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex items-center gap-1 px-2 py-1 rounded-lg border border-border bg-background hover:bg-accent transition-colors text-xs font-medium text-foreground"
+    >
+      {!err ? (
+        <img src={getBrandLogo(brand.domain)} alt={brand.name} className="w-4 h-4 rounded object-contain" onError={() => setErr(true)} />
+      ) : null}
+      {brand.name}
+    </button>
+  );
+};
 
 interface Purchase {
   id: string;
@@ -240,7 +272,18 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
                   <div className="space-y-4 pt-4">
                     <div>
                       <Label htmlFor="new-description">Descrição *</Label>
-                      <Input id="new-description" placeholder="Ex: Supermercado, Farmácia..." value={newPurchase.description} onChange={(e) => setNewPurchase({ ...newPurchase, description: e.target.value })} />
+                      <div className="flex items-center gap-2">
+                        <DescriptionLogo description={newPurchase.description} />
+                        <Input id="new-description" placeholder="Ex: Supermercado, Netflix..." value={newPurchase.description} onChange={(e) => setNewPurchase({ ...newPurchase, description: e.target.value })} className="flex-1" />
+                      </div>
+                      {/* Subscription quick-picks */}
+                      {newPurchase.category === 'subscriptions' && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {SUBSCRIPTIONS.map(s => (
+                            <SubscriptionChip key={s.domain} brand={s} onSelect={() => setNewPurchase(p => ({ ...p, description: s.name }))} />
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="new-amount">Valor (R$) *</Label>
@@ -399,7 +442,12 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
                 <TableBody>
                   {paginatedPurchases.map((purchase) => (
                     <TableRow key={purchase.id} className="hover:bg-muted/50 transition-colors">
-                      <TableCell className="font-medium py-4">{purchase.description}</TableCell>
+                      <TableCell className="font-medium py-4">
+                        <div className="flex items-center gap-2">
+                          <DescriptionLogo description={purchase.description} />
+                          <span>{purchase.description}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="text-right py-4 font-semibold text-green-500">
                         R$ {purchase.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </TableCell>
