@@ -35,10 +35,17 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [contextMode, setContextMode] = useState<'month' | 'card'>('month');
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   const handleMonthChange = (month: number, year: number) => {
     setSelectedMonth(month);
     setSelectedYear(year);
+  };
+
+  const handleContextChange = (mode: 'month' | 'card', cardId?: string) => {
+    setContextMode(mode);
+    if (mode === 'card' && cardId) setSelectedCardId(cardId);
   };
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
