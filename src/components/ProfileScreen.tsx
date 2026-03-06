@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Wallet, CheckCircle, AlertCircle, CreditCard, Plus, Trash2 } from 'lucide-react';
+import { User, Wallet, CheckCircle, AlertCircle, CreditCard, Plus, Trash2, ChevronDown } from 'lucide-react';
+import { BANKS, getBrandLogo, matchBrand } from '@/utils/brandMap';
 
 interface ProfileData {
   name: string;
@@ -57,6 +58,31 @@ const emptyCard = (): Omit<CreditCardData, 'id'> => ({
   dueDay: 8,
 });
 
+interface BrandLogoProps {
+  name: string;
+  size?: number;
+}
+const BrandLogo = ({ name, size = 28 }: BrandLogoProps) => {
+  const brand = matchBrand(name);
+  const [errored, setErrored] = useState(false);
+  if (!brand || errored) {
+    return (
+      <div style={{ width: size, height: size }} className="rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
+        <CreditCard className="text-white" style={{ width: size * 0.55, height: size * 0.55 }} />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={getBrandLogo(brand.domain)}
+      alt={brand.name}
+      style={{ width: size, height: size }}
+      className="rounded-md object-contain bg-white p-0.5 shrink-0"
+      onError={() => setErrored(true)}
+    />
+  );
+};
+
 const ProfileScreen = () => {
   const [profile, setProfile] = useState<ProfileData>({ name: '', cpf: '', expectedMonthlyBalance: '' });
   const [errors, setErrors] = useState<Partial<ProfileData>>({});
@@ -66,6 +92,7 @@ const ProfileScreen = () => {
   const [newCard, setNewCard] = useState(emptyCard());
   const [cardErrors, setCardErrors] = useState<Partial<Record<keyof Omit<CreditCardData, 'id'>, string>>>({});
   const [addingCard, setAddingCard] = useState(false);
+  const [showBankPicker, setShowBankPicker] = useState(false);
 
   useEffect(() => {
     const s = localStorage.getItem('financeAI_profile');
@@ -99,16 +126,6 @@ const ProfileScreen = () => {
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfile(p => ({ ...p, cpf: formatCPF(e.target.value) }));
-    setErrors(e2 => ({ ...e2, cpf: undefined }));
-  };
-
-  const handleBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfile(p => ({ ...p, expectedMonthlyBalance: formatCurrency(e.target.value) }));
-    setErrors(e2 => ({ ...e2, expectedMonthlyBalance: undefined }));
-  };
-
   const validateCard = (): boolean => {
     const errs: typeof cardErrors = {};
     if (!newCard.name.trim()) errs.name = 'Nome obrigatório';
@@ -129,12 +146,14 @@ const ProfileScreen = () => {
     setCardErrors({});
   };
 
-  const handleDeleteCard = (id: string) => {
-    saveCards(cards.filter(c => c.id !== id));
-  };
+  const handleDeleteCard = (id: string) => saveCards(cards.filter(c => c.id !== id));
 
   const cpfValid = profile.cpf.length > 0 && validateCPF(profile.cpf);
   const cpfInvalid = profile.cpf.length > 0 && !validateCPF(profile.cpf);
+
+  const bankSuggestions = newCard.name.length >= 1
+    ? BANKS.filter(b => b.name.toLowerCase().includes(newCard.name.toLowerCase())).slice(0, 5)
+    : BANKS.slice(0, 6);
 
   return (
     <div className="min-h-screen bg-background pt-20 px-4 pb-12">
@@ -162,7 +181,7 @@ const ProfileScreen = () => {
                 placeholder="Seu nome completo"
                 value={profile.name}
                 onChange={(e) => { setProfile(p => ({ ...p, name: e.target.value })); setErrors(e2 => ({ ...e2, name: undefined })); }}
-                className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
+                className={errors.name ? 'border-destructive' : ''}
               />
               {errors.name && <p className="text-destructive text-xs flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.name}</p>}
             </div>
@@ -174,7 +193,7 @@ const ProfileScreen = () => {
                   id="cpf"
                   placeholder="000.000.000-00"
                   value={profile.cpf}
-                  onChange={handleCPFChange}
+                  onChange={(e) => { setProfile(p => ({ ...p, cpf: formatCPF(e.target.value) })); setErrors(e2 => ({ ...e2, cpf: undefined })); }}
                   className={`pr-9 ${cpfInvalid ? 'border-destructive' : cpfValid ? 'border-success' : ''}`}
                 />
                 {cpfValid && <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-success" />}
@@ -202,7 +221,7 @@ const ProfileScreen = () => {
                   id="balance"
                   placeholder="0,00"
                   value={profile.expectedMonthlyBalance}
-                  onChange={handleBalanceChange}
+                  onChange={(e) => { setProfile(p => ({ ...p, expectedMonthlyBalance: formatCurrency(e.target.value) })); setErrors(e2 => ({ ...e2, expectedMonthlyBalance: undefined })); }}
                   className={`pl-10 ${errors.expectedMonthlyBalance ? 'border-destructive' : ''}`}
                 />
               </div>
@@ -210,10 +229,7 @@ const ProfileScreen = () => {
               <p className="text-muted-foreground text-xs">Quanto você deseja ter de saldo ao final de cada mês</p>
             </div>
 
-            <Button
-              onClick={handleSave}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-            >
+            <Button onClick={handleSave} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
               {saved ? <><CheckCircle className="w-4 h-4 mr-2" /> Salvo!</> : 'Salvar Perfil'}
             </Button>
           </CardContent>
@@ -234,17 +250,15 @@ const ProfileScreen = () => {
               )}
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Lista de cartões */}
+          <CardContent className="space-y-3">
             {cards.length === 0 && !addingCard && (
               <p className="text-muted-foreground text-sm text-center py-2">Nenhum cartão cadastrado</p>
             )}
+
             {cards.map(card => (
               <div key={card.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/30">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                    <CreditCard className="w-4 h-4 text-white" />
-                  </div>
+                  <BrandLogo name={card.name} size={32} />
                   <div>
                     <p className="text-sm font-medium text-foreground">{card.name}</p>
                     <p className="text-xs text-muted-foreground">
@@ -261,28 +275,60 @@ const ProfileScreen = () => {
               </div>
             ))}
 
-            {/* Formulário novo cartão */}
             {addingCard && (
               <div className="border border-border rounded-xl p-4 space-y-3 bg-secondary/20">
                 <p className="text-sm font-medium text-foreground">Novo cartão</p>
 
+                {/* Name + bank picker */}
                 <div className="space-y-1">
                   <Label className="text-xs">Nome do cartão</Label>
-                  <Input
-                    placeholder="Ex: Nubank, Inter, C6..."
-                    value={newCard.name}
-                    onChange={e => { setNewCard(p => ({ ...p, name: e.target.value })); setCardErrors(e2 => ({ ...e2, name: undefined })); }}
-                    className={`h-8 text-sm ${cardErrors.name ? 'border-destructive' : ''}`}
-                  />
-                  {cardErrors.name && <p className="text-destructive text-xs">{cardErrors.name}</p>}
+                  <div className="relative">
+                    <div className="flex items-center gap-2">
+                      <div className="shrink-0"><BrandLogo name={newCard.name} size={28} /></div>
+                      <Input
+                        placeholder="Ex: Nubank, Inter, C6..."
+                        value={newCard.name}
+                        onChange={e => { setNewCard(p => ({ ...p, name: e.target.value })); setCardErrors(e2 => ({ ...e2, name: undefined })); setShowBankPicker(true); }}
+                        onFocus={() => setShowBankPicker(true)}
+                        className={`h-8 text-sm ${cardErrors.name ? 'border-destructive' : ''}`}
+                      />
+                    </div>
+                    {cardErrors.name && <p className="text-destructive text-xs mt-1">{cardErrors.name}</p>}
+
+                    {/* Bank suggestions */}
+                    {showBankPicker && (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {bankSuggestions.map(bank => {
+                          const [imgErr, setImgErr] = useState(false);
+                          return (
+                            <button
+                              key={bank.domain}
+                              type="button"
+                              onClick={() => { setNewCard(p => ({ ...p, name: bank.name })); setShowBankPicker(false); setCardErrors(e2 => ({ ...e2, name: undefined })); }}
+                              className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-border bg-background hover:bg-accent transition-colors text-xs font-medium text-foreground"
+                            >
+                              {!imgErr ? (
+                                <img src={getBrandLogo(bank.domain)} alt={bank.name} className="w-4 h-4 rounded object-contain" onError={() => setImgErr(true)} />
+                              ) : (
+                                <CreditCard className="w-4 h-4 text-muted-foreground" />
+                              )}
+                              {bank.name}
+                            </button>
+                          );
+                        })}
+                        <button type="button" onClick={() => setShowBankPicker(false)} className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground">
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label className="text-xs">Últimos 4 dígitos</Label>
                     <Input
-                      placeholder="0000"
-                      maxLength={4}
+                      placeholder="0000" maxLength={4}
                       value={newCard.lastDigits}
                       onChange={e => { setNewCard(p => ({ ...p, lastDigits: e.target.value.replace(/\D/g, '').slice(0, 4) })); setCardErrors(e2 => ({ ...e2, lastDigits: undefined })); }}
                       className={`h-8 text-sm ${cardErrors.lastDigits ? 'border-destructive' : ''}`}
@@ -292,8 +338,7 @@ const ProfileScreen = () => {
                   <div className="space-y-1">
                     <Label className="text-xs">Dia fechamento</Label>
                     <Input
-                      type="number" min={1} max={28}
-                      placeholder="Ex: 15"
+                      type="number" min={1} max={28} placeholder="15"
                       value={newCard.closingDay}
                       onChange={e => { setNewCard(p => ({ ...p, closingDay: Number(e.target.value) })); setCardErrors(e2 => ({ ...e2, closingDay: undefined })); }}
                       className={`h-8 text-sm ${cardErrors.closingDay ? 'border-destructive' : ''}`}
@@ -303,8 +348,7 @@ const ProfileScreen = () => {
                   <div className="space-y-1">
                     <Label className="text-xs">Dia vencimento</Label>
                     <Input
-                      type="number" min={1} max={28}
-                      placeholder="Ex: 22"
+                      type="number" min={1} max={28} placeholder="22"
                       value={newCard.dueDay}
                       onChange={e => { setNewCard(p => ({ ...p, dueDay: Number(e.target.value) })); setCardErrors(e2 => ({ ...e2, dueDay: undefined })); }}
                       className={`h-8 text-sm ${cardErrors.dueDay ? 'border-destructive' : ''}`}
@@ -317,7 +361,7 @@ const ProfileScreen = () => {
                   <Button size="sm" onClick={handleAddCard} className="flex-1 h-8 text-xs bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700">
                     Salvar cartão
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setAddingCard(false); setNewCard(emptyCard()); setCardErrors({}); }} className="h-8 text-xs">
+                  <Button size="sm" variant="outline" onClick={() => { setAddingCard(false); setNewCard(emptyCard()); setCardErrors({}); setShowBankPicker(false); }} className="h-8 text-xs">
                     Cancelar
                   </Button>
                 </div>
