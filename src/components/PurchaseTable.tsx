@@ -11,7 +11,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Search, Edit, Trash2, Filter, FileSpreadsheet, FileText, BarChart3, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportToExcel, exportToCSV, exportToPowerBI } from '@/utils/exportUtils';
-import { matchBrand, getBrandLogo, SUBSCRIPTIONS } from '@/utils/brandMap';
+import { matchBrand, getBrandLogo, SUBSCRIPTIONS, type Brand } from '@/utils/brandMap';
 
 /** Mini logo for a purchase description */
 const DescriptionLogo = ({ description }: { description: string }) => {
@@ -25,6 +25,22 @@ const DescriptionLogo = ({ description }: { description: string }) => {
       className="w-5 h-5 rounded object-contain bg-white shrink-0"
       onError={() => setErr(true)}
     />
+  );
+};
+
+const SubscriptionChip = ({ brand, onSelect }: { brand: Brand; onSelect: () => void }) => {
+  const [err, setErr] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex items-center gap-1 px-2 py-1 rounded-lg border border-border bg-background hover:bg-accent transition-colors text-xs font-medium text-foreground"
+    >
+      {!err ? (
+        <img src={getBrandLogo(brand.domain)} alt={brand.name} className="w-4 h-4 rounded object-contain" onError={() => setErr(true)} />
+      ) : null}
+      {brand.name}
+    </button>
   );
 };
 
