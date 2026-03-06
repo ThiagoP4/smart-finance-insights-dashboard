@@ -11,6 +11,22 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Search, Edit, Trash2, Filter, FileSpreadsheet, FileText, BarChart3, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportToExcel, exportToCSV, exportToPowerBI } from '@/utils/exportUtils';
+import { matchBrand, getBrandLogo, SUBSCRIPTIONS } from '@/utils/brandMap';
+
+/** Mini logo for a purchase description */
+const DescriptionLogo = ({ description }: { description: string }) => {
+  const brand = matchBrand(description);
+  const [err, setErr] = useState(false);
+  if (!brand || err) return null;
+  return (
+    <img
+      src={getBrandLogo(brand.domain)}
+      alt={brand.name}
+      className="w-5 h-5 rounded object-contain bg-white shrink-0"
+      onError={() => setErr(true)}
+    />
+  );
+};
 
 interface Purchase {
   id: string;
