@@ -267,6 +267,9 @@ const Index = () => {
         selectedMonth={selectedMonth}
         selectedYear={selectedYear}
         onMonthChange={handleMonthChange}
+        contextMode={contextMode}
+        selectedCardId={selectedCardId}
+        onContextChange={handleContextChange}
       />
       {renderContent()}
     </div>
