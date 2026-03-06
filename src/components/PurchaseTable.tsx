@@ -415,7 +415,12 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
                 <TableBody>
                   {paginatedPurchases.map((purchase) => (
                     <TableRow key={purchase.id} className="hover:bg-muted/50 transition-colors">
-                      <TableCell className="font-medium py-4">{purchase.description}</TableCell>
+                      <TableCell className="font-medium py-4">
+                        <div className="flex items-center gap-2">
+                          <DescriptionLogo description={purchase.description} />
+                          <span>{purchase.description}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="text-right py-4 font-semibold text-green-500">
                         R$ {purchase.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </TableCell>
