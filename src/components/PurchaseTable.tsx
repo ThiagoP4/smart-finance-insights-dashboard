@@ -256,7 +256,18 @@ const PurchaseTable = ({ purchases, categories, onUpdatePurchase, onDeletePurcha
                   <div className="space-y-4 pt-4">
                     <div>
                       <Label htmlFor="new-description">Descrição *</Label>
-                      <Input id="new-description" placeholder="Ex: Supermercado, Farmácia..." value={newPurchase.description} onChange={(e) => setNewPurchase({ ...newPurchase, description: e.target.value })} />
+                      <div className="flex items-center gap-2">
+                        <DescriptionLogo description={newPurchase.description} />
+                        <Input id="new-description" placeholder="Ex: Supermercado, Netflix..." value={newPurchase.description} onChange={(e) => setNewPurchase({ ...newPurchase, description: e.target.value })} className="flex-1" />
+                      </div>
+                      {/* Subscription quick-picks */}
+                      {newPurchase.category === 'subscriptions' && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {SUBSCRIPTIONS.map(s => (
+                            <SubscriptionChip key={s.domain} brand={s} onSelect={() => setNewPurchase(p => ({ ...p, description: s.name }))} />
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="new-amount">Valor (R$) *</Label>
