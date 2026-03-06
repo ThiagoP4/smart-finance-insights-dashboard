@@ -83,6 +83,28 @@ const BrandLogo = ({ name, size = 28 }: BrandLogoProps) => {
   );
 };
 
+interface BankChipProps {
+  bank: { name: string; domain: string };
+  onSelect: () => void;
+}
+const BankChip = ({ bank, onSelect }: BankChipProps) => {
+  const [imgErr, setImgErr] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-border bg-background hover:bg-accent transition-colors text-xs font-medium text-foreground"
+    >
+      {!imgErr ? (
+        <img src={getBrandLogo(bank.domain)} alt={bank.name} className="w-4 h-4 rounded object-contain" onError={() => setImgErr(true)} />
+      ) : (
+        <CreditCard className="w-4 h-4 text-muted-foreground" />
+      )}
+      {bank.name}
+    </button>
+  );
+};
+
 const ProfileScreen = () => {
   const [profile, setProfile] = useState<ProfileData>({ name: '', cpf: '', expectedMonthlyBalance: '' });
   const [errors, setErrors] = useState<Partial<ProfileData>>({});
