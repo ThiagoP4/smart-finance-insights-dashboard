@@ -298,24 +298,13 @@ const ProfileScreen = () => {
                     {/* Bank suggestions */}
                     {showBankPicker && (
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
-                        {bankSuggestions.map(bank => {
-                          const [imgErr, setImgErr] = useState(false);
-                          return (
-                            <button
-                              key={bank.domain}
-                              type="button"
-                              onClick={() => { setNewCard(p => ({ ...p, name: bank.name })); setShowBankPicker(false); setCardErrors(e2 => ({ ...e2, name: undefined })); }}
-                              className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-border bg-background hover:bg-accent transition-colors text-xs font-medium text-foreground"
-                            >
-                              {!imgErr ? (
-                                <img src={getBrandLogo(bank.domain)} alt={bank.name} className="w-4 h-4 rounded object-contain" onError={() => setImgErr(true)} />
-                              ) : (
-                                <CreditCard className="w-4 h-4 text-muted-foreground" />
-                              )}
-                              {bank.name}
-                            </button>
-                          );
-                        })}
+                        {bankSuggestions.map(bank => (
+                          <BankChip
+                            key={bank.domain}
+                            bank={bank}
+                            onSelect={() => { setNewCard(p => ({ ...p, name: bank.name })); setShowBankPicker(false); setCardErrors(e2 => ({ ...e2, name: undefined })); }}
+                          />
+                        ))}
                         <button type="button" onClick={() => setShowBankPicker(false)} className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground">
                           <ChevronDown className="w-3.5 h-3.5" />
                         </button>
