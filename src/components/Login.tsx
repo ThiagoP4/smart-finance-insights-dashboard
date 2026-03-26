@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 interface LoginProps {
   onLogin: () => void;
@@ -31,9 +32,7 @@ const Login = ({ onLogin }: LoginProps) => {
       <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-sm shadow-xl border-border/50">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-4 bg-gradient-to-r from-primary to-accent rounded-2xl shadow-lg">
-              <BarChart3 className="w-8 h-8 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="D'accord" className="w-16 h-16 drop-shadow-lg" />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             D'accord

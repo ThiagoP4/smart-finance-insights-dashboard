@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { BarChart3, MessageSquare, TrendingUp, Shield, Plus } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 interface HeroProps {
   setActiveSection: (section: string) => void;
@@ -15,9 +16,7 @@ const Hero = ({ setActiveSection }: HeroProps) => {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
           <div className="flex justify-center mb-8">
-            <div className="p-4 bg-gradient-to-r from-primary to-accent rounded-2xl shadow-lg">
-              <BarChart3 className="w-12 h-12 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="D'accord" className="w-24 h-24 drop-shadow-lg" />
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-6 leading-tight">

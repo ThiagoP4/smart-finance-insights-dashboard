@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, FileSpreadsheet, Sparkles, Menu, CalendarDays, ChevronDown, CreditCard, Calendar } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import AppSidebar from './AppSidebar';
 import type { CreditCardData } from './ProfileScreen';
 
@@ -89,9 +90,12 @@ const Navbar = ({
             </AppSidebar>
             <button
               onClick={() => setActiveSection('home')}
-              className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:scale-105 transition-transform tracking-tight"
+              className="flex items-center gap-2 hover:scale-105 transition-transform"
             >
-              D'accord
+              <img src={logo} alt="D'accord" className="w-8 h-8" />
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
+                D'accord
+              </span>
             </button>
           </div>
 

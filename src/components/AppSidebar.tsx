@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from 'next-themes';
 import { Moon, Sun, LogOut, Settings, User, HelpCircle, Info } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import {
   Sheet,
   SheetContent,
@@ -36,9 +37,12 @@ const AppSidebar = ({ onLogout, onNavigate, children }: AppSidebarProps) => {
       </SheetTrigger>
       <SheetContent side="left" className="w-72 bg-sidebar text-sidebar-foreground p-0">
         <SheetHeader className="p-6 pb-4">
-          <SheetTitle className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            D'accord
-          </SheetTitle>
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="D'accord" className="w-8 h-8" />
+            <SheetTitle className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              D'accord
+            </SheetTitle>
+          </div>
         </SheetHeader>
 
         <div className="flex flex-col h-[calc(100%-5rem)]">
