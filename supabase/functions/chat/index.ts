@@ -24,7 +24,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Você é um assistente financeiro inteligente chamado Finance AI. Você ajuda usuários a:
+            content: `Você é um assistente financeiro inteligente chamado D'accord. Você ajuda casais a:
 - Analisar gastos e receitas
 - Dar dicas de economia e investimentos
 - Criar orçamentos e planos financeiros

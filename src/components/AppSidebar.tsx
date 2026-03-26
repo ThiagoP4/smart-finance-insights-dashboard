@@ -36,8 +36,8 @@ const AppSidebar = ({ onLogout, onNavigate, children }: AppSidebarProps) => {
       </SheetTrigger>
       <SheetContent side="left" className="w-72 bg-sidebar text-sidebar-foreground p-0">
         <SheetHeader className="p-6 pb-4">
-          <SheetTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Finance AI
+          <SheetTitle className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            D'accord
           </SheetTitle>
         </SheetHeader>
 

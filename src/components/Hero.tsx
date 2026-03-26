@@ -10,31 +10,31 @@ interface HeroProps {
 const Hero = ({ setActiveSection }: HeroProps) => {
   return (
     <div className="relative min-h-screen bg-background pt-16">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-purple-600/5"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
           <div className="flex justify-center mb-8">
-            <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg">
-              <BarChart3 className="w-12 h-12 text-white" />
+            <div className="p-4 bg-gradient-to-r from-primary to-accent rounded-2xl shadow-lg">
+              <BarChart3 className="w-12 h-12 text-primary-foreground" />
             </div>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6 leading-tight">
-            Seu Agente
+          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-6 leading-tight">
+            D'accord
             <br />
-            Financeiro IA
+            <span className="text-3xl md:text-4xl">Finanças do Casal</span>
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-            Controle suas finanças de forma inteligente. Cadastre suas compras, 
-            analise tendências e tome decisões financeiras mais assertivas com nossa IA.
+            Controlem suas finanças juntos, de forma inteligente. Cadastrem compras, 
+            analisem tendências e tomem decisões financeiras em harmonia 💕
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Button
               onClick={() => setActiveSection('add-purchase')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
               <Plus className="w-5 h-5 mr-2" />
               Cadastrar Compra
@@ -53,43 +53,43 @@ const Hero = ({ setActiveSection }: HeroProps) => {
         
         <div className="grid md:grid-cols-3 gap-8 mt-20">
           <div className="bg-card/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all hover:scale-105 border border-border/50">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-6">
-              <TrendingUp className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-r from-success to-emerald-500 rounded-xl flex items-center justify-center mb-6">
+              <TrendingUp className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-4">Análise Inteligente</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-4">Análise a Dois</h3>
             <p className="text-muted-foreground">
-              Nossa IA analisa seus gastos e identifica padrões para ajudar você a economizar mais.
+              Nossa IA analisa os gastos do casal e identifica padrões para economizar juntos.
             </p>
           </div>
           
           <div className="bg-card/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all hover:scale-105 border border-border/50">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-6">
-              <MessageSquare className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center mb-6">
+              <MessageSquare className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-4">WhatsApp Bot</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-4">Controle Compartilhado</h3>
             <p className="text-muted-foreground">
-              Cadastre suas compras rapidamente via WhatsApp com nosso bot inteligente.
+              Visualizem juntos as despesas, receitas e faturas em um só lugar.
             </p>
           </div>
           
           <div className="bg-card/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all hover:scale-105 border border-border/50">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-6">
-              <Shield className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-r from-accent to-primary rounded-xl flex items-center justify-center mb-6">
+              <Shield className="w-6 h-6 text-primary-foreground" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-4">Dados Seguros</h3>
             <p className="text-muted-foreground">
-              Seus dados financeiros são protegidos com criptografia de ponta a ponta.
+              Os dados financeiros do casal são protegidos com criptografia de ponta a ponta.
             </p>
           </div>
         </div>
         
         <div className="text-center mt-16">
           <Button
-            onClick={() => window.open('https://wa.me/5511999999999?text=Olá! Gostaria de cadastrar uma compra via WhatsApp', '_blank')}
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            onClick={() => setActiveSection('dashboard')}
+            className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
           >
-            <MessageSquare className="w-5 h-5 mr-2" />
-            Começar pelo WhatsApp
+            <BarChart3 className="w-5 h-5 mr-2" />
+            Começar Agora
           </Button>
         </div>
       </div>

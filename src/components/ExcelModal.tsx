@@ -49,7 +49,7 @@ const ExcelModal = ({ purchases, incomes, categories, selectedMonth, selectedYea
       'Tipo': i.type, 'Data': new Date(i.date).toLocaleDateString('pt-BR'),
       'Recorrente': i.recurring ? 'Sim' : 'Não',
     }))), 'Entradas');
-    XLSX.writeFile(wb, `FinanceAI_${scope === 'month' ? `${MONTHS[selectedMonth]}_${selectedYear}` : 'Todos'}.xlsx`);
+    XLSX.writeFile(wb, `Daccord_${scope === 'month' ? `${MONTHS[selectedMonth]}_${selectedYear}` : 'Todos'}.xlsx`);
     toast({ title: 'Exportado!', description: 'Planilha baixada com sucesso.' });
     setIsOpen(false);
   };

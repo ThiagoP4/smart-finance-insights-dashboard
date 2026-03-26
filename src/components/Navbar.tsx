@@ -89,9 +89,9 @@ const Navbar = ({
             </AppSidebar>
             <button
               onClick={() => setActiveSection('home')}
-              className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:scale-105 transition-transform"
+              className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:scale-105 transition-transform tracking-tight"
             >
-              Finance AI
+              D'accord
             </button>
           </div>
 
@@ -108,11 +108,11 @@ const Navbar = ({
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:scale-105 text-sm font-medium ${
                       activeSection === item.id
                         ? isAI
-                          ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-lg'
-                          : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                        ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg'
+                          : 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg'
                         : isAI
-                          ? 'text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 border border-violet-200 dark:border-violet-500/30'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                          ? 'text-primary hover:bg-primary/10 border border-primary/30'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -235,11 +235,11 @@ const Navbar = ({
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg whitespace-nowrap transition-all text-sm font-medium ${
                     activeSection === item.id
                       ? isAI
-                        ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white'
-                        : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                        ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground'
+                        : 'bg-gradient-to-r from-primary to-accent text-primary-foreground'
                       : isAI
-                        ? 'text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-500/30'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                        ? 'text-primary border border-primary/30'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                   }`}
                 >
                   <Icon className="w-4 h-4" />

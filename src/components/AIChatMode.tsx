@@ -124,7 +124,7 @@ const AIChatMode = () => {
               <Bot className="w-10 h-10 text-violet-500" />
             </div>
             <div>
-              <p className="text-foreground font-semibold mb-1">Olá! Sou o Finance AI 👋</p>
+              <p className="text-foreground font-semibold mb-1">Olá! Sou o D'accord AI 💕</p>
               <p className="text-sm text-muted-foreground max-w-sm">
                 Pergunte sobre seus gastos, peça dicas de economia ou ajuda para planejar suas finanças.
               </p>
