@@ -26,7 +26,7 @@ const Login = ({ onLogin }: LoginProps) => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-purple-600/5"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
       
       <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-sm shadow-xl border-border/50">
         <CardHeader className="text-center">
