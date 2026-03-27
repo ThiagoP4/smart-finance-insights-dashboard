@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, FileSpreadsheet, Sparkles, Menu, CalendarDays, ChevronDown, CreditCard, Calendar } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import { BarChart, FileSpreadsheet, Sparkles, Menu, CalendarDays, ChevronDown, CreditCard, Calendar, Sigma } from 'lucide-react';
 import AppSidebar from './AppSidebar';
 import type { CreditCardData } from './ProfileScreen';
 
@@ -92,9 +91,11 @@ const Navbar = ({
               onClick={() => setActiveSection('home')}
               className="flex items-center gap-2 hover:scale-105 transition-transform"
             >
-              <img src={logo} alt="D'accord" className="w-8 h-8" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Sigma className="w-5 h-5 text-primary-foreground" />
+              </div>
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-                D'accord
+                Somma AI
               </span>
             </button>
           </div>

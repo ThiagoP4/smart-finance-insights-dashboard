@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { FileSpreadsheet, Upload, Download, Calendar, CalendarDays, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
-
 interface Purchase { id: string; description: string; amount: number; category: string; date: string; }
 interface Income { id: string; description: string; amount: number; type: string; date: string; recurring: boolean; }
 interface Category { id: string; name: string; label: string; }
@@ -49,7 +48,7 @@ const ExcelModal = ({ purchases, incomes, categories, selectedMonth, selectedYea
       'Tipo': i.type, 'Data': new Date(i.date).toLocaleDateString('pt-BR'),
       'Recorrente': i.recurring ? 'Sim' : 'Não',
     }))), 'Entradas');
-    XLSX.writeFile(wb, `Daccord_${scope === 'month' ? `${MONTHS[selectedMonth]}_${selectedYear}` : 'Todos'}.xlsx`);
+    XLSX.writeFile(wb, `SommaAI_${scope === 'month' ? `${MONTHS[selectedMonth]}_${selectedYear}` : 'Todos'}.xlsx`);
     toast({ title: 'Exportado!', description: 'Planilha baixada com sucesso.' });
     setIsOpen(false);
   };

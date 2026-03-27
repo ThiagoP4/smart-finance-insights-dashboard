@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogIn } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import { LogIn, Sigma } from 'lucide-react';
 
 interface LoginProps {
   onLogin: () => void;
@@ -32,12 +31,14 @@ const Login = ({ onLogin }: LoginProps) => {
       <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-sm shadow-xl border-border/50">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="D'accord" className="w-16 h-16 drop-shadow-lg" />
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+              <Sigma className="w-9 h-9 text-primary-foreground" />
+            </div>
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            D'accord
+            Somma AI
           </CardTitle>
-          <p className="text-muted-foreground">Finanças do casal, em harmonia 💕</p>
+          <p className="text-muted-foreground">Finanças inteligentes</p>
         </CardHeader>
         
         <CardContent>
