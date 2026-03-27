@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { BarChart3, MessageSquare, TrendingUp, Shield, Plus } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import { BarChart3, MessageSquare, TrendingUp, Shield, Plus, Sigma } from 'lucide-react';
 
 interface HeroProps {
   setActiveSection: (section: string) => void;
@@ -16,13 +15,15 @@ const Hero = ({ setActiveSection }: HeroProps) => {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
           <div className="flex justify-center mb-8">
-            <img src={logo} alt="D'accord" className="w-24 h-24 drop-shadow-lg" />
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+              <Sigma className="w-14 h-14 text-primary-foreground" />
+            </div>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-6 leading-tight">
-            D'accord
+            Somma AI
             <br />
-            <span className="text-3xl md:text-4xl">Finanças do Casal</span>
+            <span className="text-3xl md:text-4xl">Finanças Inteligentes</span>
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">

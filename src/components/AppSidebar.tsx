@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTheme } from 'next-themes';
-import { Moon, Sun, LogOut, Settings, User, HelpCircle, Info } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import { Moon, Sun, LogOut, Settings, User, HelpCircle, Info, Sigma } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -38,9 +37,11 @@ const AppSidebar = ({ onLogout, onNavigate, children }: AppSidebarProps) => {
       <SheetContent side="left" className="w-72 bg-sidebar text-sidebar-foreground p-0">
         <SheetHeader className="p-6 pb-4">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="D'accord" className="w-8 h-8" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <Sigma className="w-5 h-5 text-primary-foreground" />
+            </div>
             <SheetTitle className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              D'accord
+              Somma AI
             </SheetTitle>
           </div>
         </SheetHeader>

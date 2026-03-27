@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { FileSpreadsheet, Upload, Download, Calendar, CalendarDays, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
-
 interface Purchase { id: string; description: string; amount: number; category: string; date: string; }
 interface Income { id: string; description: string; amount: number; type: string; date: string; recurring: boolean; }
 interface Category { id: string; name: string; label: string; }
