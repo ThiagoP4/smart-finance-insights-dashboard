@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area, Legend } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Wallet, ArrowUpRight, ArrowDownRight, Scale } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, Legend } from 'recharts';
+import { TrendingUp, TrendingDown, DollarSign, Wallet, ArrowUpRight, ArrowDownRight, Scale, CreditCard, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import type { CreditCardData } from './ProfileScreen';
+import { matchBrand, getBrandLogo } from '@/utils/brandMap';
 
 interface Purchase {
   id: string;
@@ -32,7 +35,7 @@ interface DashboardProps {
   categories?: Category[];
 }
 
-const categoryColors = {
+const categoryColors: Record<string, string> = {
   food: '#10b981',
   pharmacy: '#ef4444',
   subscriptions: '#a78bfa',
@@ -45,29 +48,7 @@ const categoryColors = {
   others: '#9ca3af'
 };
 
-const incomeTypeColors = {
-  salary: '#10b981',
-  freelance: '#60a5fa',
-  investment: '#a78bfa',
-  rental: '#fb923c',
-  bonus: '#facc15',
-  gift: '#f472b6',
-  refund: '#2dd4bf',
-  other: '#9ca3af'
-};
-
-const incomeTypeLabels: Record<string, string> = {
-  salary: 'Salário',
-  freelance: 'Freelance',
-  investment: 'Investimentos',
-  rental: 'Aluguel',
-  bonus: 'Bônus',
-  gift: 'Presente/Doação',
-  refund: 'Reembolso',
-  other: 'Outros'
-};
-
-const defaultCategoryLabels = {
+const defaultCategoryLabels: Record<string, string> = {
   food: 'Alimentícia',
   pharmacy: 'Farmacêutica',
   subscriptions: 'Assinaturas',
@@ -106,404 +87,304 @@ const PieTooltip = ({ active, payload }: any) => {
   );
 };
 
+/* Small card brand logo */
+const CardBrandLogo = ({ name }: { name: string }) => {
+  const brand = matchBrand(name);
+  const [err, setErr] = useState(false);
+  if (!brand || err) return <CreditCard className="w-6 h-6 text-muted-foreground" />;
+  return <img src={getBrandLogo(brand.domain)} alt={brand.name} className="w-6 h-6 rounded object-contain" onError={() => setErr(true)} />;
+};
+
 const Dashboard = ({ purchases, incomes = [], categories = [] }: DashboardProps) => {
+  const [cards, setCards] = useState<CreditCardData[]>([]);
+  const [cardScrollIndex, setCardScrollIndex] = useState(0);
+  const [statsView, setStatsView] = useState<'weekly' | 'monthly'>('monthly');
+
+  useEffect(() => {
+    const stored = localStorage.getItem('financeAI_cards');
+    if (stored) setCards(JSON.parse(stored));
+  }, []);
+
   const categoryLabels = categories.reduce((acc, cat) => {
     acc[cat.name] = cat.label;
     return acc;
   }, {} as Record<string, string>);
-
   const allCategoryLabels = { ...defaultCategoryLabels, ...categoryLabels };
 
-  const totalSpending = purchases.reduce((sum, purchase) => sum + purchase.amount, 0);
-  const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
+  const totalSpending = purchases.reduce((sum, p) => sum + p.amount, 0);
+  const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
   const balance = totalIncome - totalSpending;
-  const savingsRate = totalIncome > 0 ? ((totalIncome - totalSpending) / totalIncome) * 100 : 0;
 
   const categoryData = Object.entries(
-    purchases.reduce((acc, purchase) => {
-      acc[purchase.category] = (acc[purchase.category] || 0) + purchase.amount;
-      return acc;
-    }, {} as Record<string, number>)
+    purchases.reduce((acc, p) => { acc[p.category] = (acc[p.category] || 0) + p.amount; return acc; }, {} as Record<string, number>)
   ).map(([category, amount]) => ({
     name: allCategoryLabels[category] || category,
     value: amount,
-    color: categoryColors[category as keyof typeof categoryColors] || '#9ca3af'
-  }));
-
-  const incomeTypeData = Object.entries(
-    incomes.reduce((acc, income) => {
-      acc[income.type] = (acc[income.type] || 0) + income.amount;
-      return acc;
-    }, {} as Record<string, number>)
-  ).map(([type, amount]) => ({
-    name: incomeTypeLabels[type] || type,
-    value: amount,
-    color: incomeTypeColors[type as keyof typeof incomeTypeColors] || '#9ca3af'
+    color: categoryColors[category] || '#9ca3af'
   }));
 
   const monthlyComparisonData = () => {
-    const monthlyMap: Record<string, { month: string; income: number; expenses: number }> = {};
-    
-    purchases.forEach(purchase => {
-      const month = new Date(purchase.date).toLocaleString('pt-BR', { month: 'short', year: '2-digit' });
-      if (!monthlyMap[month]) monthlyMap[month] = { month, income: 0, expenses: 0 };
-      monthlyMap[month].expenses += purchase.amount;
+    const map: Record<string, { month: string; income: number; expenses: number }> = {};
+    purchases.forEach(p => {
+      const m = new Date(p.date).toLocaleString('pt-BR', { month: 'short', year: '2-digit' });
+      if (!map[m]) map[m] = { month: m, income: 0, expenses: 0 };
+      map[m].expenses += p.amount;
     });
-
-    incomes.forEach(income => {
-      const month = new Date(income.date).toLocaleString('pt-BR', { month: 'short', year: '2-digit' });
-      if (!monthlyMap[month]) monthlyMap[month] = { month, income: 0, expenses: 0 };
-      monthlyMap[month].income += income.amount;
+    incomes.forEach(i => {
+      const m = new Date(i.date).toLocaleString('pt-BR', { month: 'short', year: '2-digit' });
+      if (!map[m]) map[m] = { month: m, income: 0, expenses: 0 };
+      map[m].income += i.amount;
     });
-
-    return Object.values(monthlyMap).sort((a, b) => {
-      const parseDate = (str: string) => {
-        const [monthStr, yearStr] = str.split(' ');
-        const monthMap: Record<string, number> = { 'jan': 0, 'fev': 1, 'mar': 2, 'abr': 3, 'mai': 4, 'jun': 5, 'jul': 6, 'ago': 7, 'set': 8, 'out': 9, 'nov': 10, 'dez': 11 };
-        return new Date(2000 + parseInt(yearStr), monthMap[monthStr.toLowerCase()] || 0);
+    return Object.values(map).sort((a, b) => {
+      const parse = (s: string) => {
+        const [mStr, yStr] = s.split(' ');
+        const mMap: Record<string, number> = { jan: 0, fev: 1, mar: 2, abr: 3, mai: 4, jun: 5, jul: 6, ago: 7, set: 8, out: 9, nov: 10, dez: 11 };
+        return new Date(2000 + parseInt(yStr), mMap[mStr.toLowerCase()] || 0);
       };
-      return parseDate(a.month).getTime() - parseDate(b.month).getTime();
+      return parse(a.month).getTime() - parse(b.month).getTime();
     });
   };
 
   const comparisonData = monthlyComparisonData();
 
-  const balanceEvolutionData = comparisonData.map((item, index) => {
-    const previousBalance = comparisonData.slice(0, index).reduce((acc, curr) => acc + (curr.income - curr.expenses), 0);
-    return {
-      month: item.month,
-      balance: previousBalance + (item.income - item.expenses),
-      income: item.income,
-      expenses: item.expenses
-    };
-  });
+  const recentPurchases = [...purchases].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
 
-  const recentPurchases = purchases.slice(-5);
-  const previousPurchases = purchases.slice(-10, -5);
-  const recentTotal = recentPurchases.reduce((sum, purchase) => sum + purchase.amount, 0);
-  const previousTotal = previousPurchases.reduce((sum, purchase) => sum + purchase.amount, 0);
-  const trend = recentTotal > previousTotal ? 'up' : 'down';
-  const trendPercentage = previousTotal > 0 ? Math.abs(((recentTotal - previousTotal) / previousTotal) * 100) : 0;
+  const axisStyle = { fill: 'hsl(var(--muted-foreground))', fontSize: 11 };
 
-  const axisStyle = { fill: 'hsl(var(--muted-foreground))', fontSize: 12 };
-  const gridStyle = { stroke: 'hsl(var(--border))', strokeDasharray: '3 3' };
+  const visibleCards = cards.slice(cardScrollIndex, cardScrollIndex + 3);
 
   return (
     <div className="min-h-screen bg-background pt-20 px-4 pb-12">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Dashboard Financeiro
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Análise completa dos seus gastos, receitas e tendências
-          </p>
+        {/* Greeting */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">Olá! 👋</h1>
+          <p className="text-muted-foreground text-sm">Todas as informações das suas finanças abaixo.</p>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg">
+        {/* Top row: Balance card + Credit cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
+          {/* Balance Card */}
+          <Card className="lg:col-span-2 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20 shadow-lg">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-emerald-100 text-sm font-medium">Total Receitas</p>
-                  <p className="text-2xl font-bold">
-                    R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
+              <p className="text-sm text-muted-foreground mb-1">Saldo disponível</p>
+              <p className={`text-4xl font-bold ${balance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
+                R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <div className="flex gap-6 mt-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                    <ArrowDownRight className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Receitas</p>
+                    <p className="text-sm font-semibold text-foreground">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
                 </div>
-                <ArrowUpRight className="w-8 h-8 text-emerald-200" />
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-destructive/15 flex items-center justify-center">
+                    <ArrowUpRight className="w-4 h-4 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Despesas</p>
+                    <p className="text-sm font-semibold text-foreground">R$ {totalSpending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-red-100 text-sm font-medium">Total Despesas</p>
-                  <p className="text-2xl font-bold">
-                    R$ {totalSpending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
+          {/* Credit Cards Carousel */}
+          <div className="lg:col-span-3 flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-muted-foreground">Meus Cartões</p>
+              {cards.length > 3 && (
+                <div className="flex gap-1">
+                  <button onClick={() => setCardScrollIndex(Math.max(0, cardScrollIndex - 1))} disabled={cardScrollIndex === 0} className="p-1 rounded hover:bg-secondary disabled:opacity-30">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setCardScrollIndex(Math.min(cards.length - 3, cardScrollIndex + 1))} disabled={cardScrollIndex >= cards.length - 3} className="p-1 rounded hover:bg-secondary disabled:opacity-30">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
-                <ArrowDownRight className="w-8 h-8 text-red-200" />
+              )}
+            </div>
+            {cards.length === 0 ? (
+              <Card className="flex-1 flex items-center justify-center border-dashed">
+                <CardContent className="py-6 text-center">
+                  <CreditCard className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Cadastre cartões no Perfil</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 flex-1">
+                {visibleCards.map(card => (
+                  <Card key={card.id} className="bg-card shadow-md hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4 flex flex-col justify-between h-full">
+                      <div className="flex items-center justify-between mb-3">
+                        <CardBrandLogo name={card.name} />
+                        <span className="text-[10px] text-muted-foreground font-medium">{card.name}</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">•••• {card.lastDigits}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">Fecha dia {card.closingDay} · Vence dia {card.dueDay}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`bg-gradient-to-br ${balance >= 0 ? 'from-blue-500 to-blue-600' : 'from-orange-500 to-orange-600'} text-white border-0 shadow-lg`}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`${balance >= 0 ? 'text-blue-100' : 'text-orange-100'} text-sm font-medium`}>Saldo</p>
-                  <p className="text-2xl font-bold">
-                    R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-                <Scale className="w-8 h-8 text-white/60" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`bg-gradient-to-br ${savingsRate >= 0 ? 'from-purple-500 to-purple-600' : 'from-gray-500 to-gray-600'} text-white border-0 shadow-lg`}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm font-medium">Taxa de Economia</p>
-                  <p className="text-2xl font-bold">
-                    {savingsRate.toFixed(1)}%
-                  </p>
-                </div>
-                <Wallet className="w-8 h-8 text-purple-200" />
-              </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         </div>
 
-        {/* Secondary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-card border-border shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium">Compras Realizadas</p>
-                  <p className="text-2xl font-bold text-foreground">{purchases.length}</p>
-                </div>
-                <Calendar className="w-8 h-8 text-blue-400" />
-              </div>
+        {/* Middle row: Transactions + Statistics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {/* Recent Transactions */}
+          <Card className="shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-foreground">Últimas Transações</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {recentPurchases.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Nenhuma transação registrada</p>
+              ) : (
+                recentPurchases.map(p => (
+                  <div key={p.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: (categoryColors[p.category] || '#9ca3af') + '20' }}>
+                        <DollarSign className="w-4 h-4" style={{ color: categoryColors[p.category] || '#9ca3af' }} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{p.description}</p>
+                        <p className="text-[11px] text-muted-foreground">{new Date(p.date).toLocaleDateString('pt-BR')}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm font-semibold text-destructive">
+                      -R$ {p.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border shadow-lg">
-            <CardContent className="p-6">
+          {/* Statistics */}
+          <Card className="shadow-md">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium">Média por Compra</p>
-                  <p className="text-2xl font-bold text-foreground">
-                    R$ {purchases.length > 0 ? (totalSpending / purchases.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
-                  </p>
+                <CardTitle className="text-base text-foreground">Estatísticas</CardTitle>
+                <div className="flex rounded-lg border border-border overflow-hidden text-xs">
+                  <button
+                    onClick={() => setStatsView('monthly')}
+                    className={`px-3 py-1 transition-colors ${statsView === 'monthly' ? 'bg-foreground text-background' : 'text-muted-foreground hover:bg-secondary'}`}
+                  >
+                    Mensal
+                  </button>
                 </div>
-                <DollarSign className="w-8 h-8 text-green-400" />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm font-medium">Tendência Gastos</p>
-                  <p className={`text-2xl font-bold ${trend === 'up' ? 'text-red-500' : 'text-green-500'}`}>
-                    {trend === 'up' ? '+' : '-'}{trendPercentage.toFixed(1)}%
-                  </p>
-                </div>
-                {trend === 'up' ? 
-                  <TrendingUp className="w-8 h-8 text-red-400" /> : 
-                  <TrendingDown className="w-8 h-8 text-green-400" />
-                }
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Income vs Expenses Comparison */}
-        <Card className="shadow-lg border-border bg-card mb-8">
-          <CardHeader>
-            <CardTitle className="text-xl text-foreground">📊 Receitas vs Despesas por Mês</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={comparisonData} barGap={8}>
-                <CartesianGrid {...gridStyle} />
-                <XAxis dataKey="month" tick={axisStyle} axisLine={false} tickLine={false} />
-                <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
-                <Bar dataKey="income" name="Receitas" fill="#10b981" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="expenses" name="Despesas" fill="#ef4444" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Balance Evolution */}
-        <Card className="shadow-lg border-border bg-card mb-8">
-          <CardHeader>
-            <CardTitle className="text-xl text-foreground">📈 Evolução do Saldo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={balanceEvolutionData}>
-                <defs>
-                  <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#60a5fa" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid {...gridStyle} />
-                <XAxis dataKey="month" tick={axisStyle} axisLine={false} tickLine={false} />
-                <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area 
-                  type="monotone" 
-                  dataKey="balance" 
-                  name="Saldo Acumulado"
-                  stroke="#60a5fa" 
-                  fill="url(#balanceGradient)" 
-                  strokeWidth={3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Pie Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <Card className="shadow-lg border-border bg-card">
-            <CardHeader>
-              <CardTitle className="text-xl text-foreground">💸 Gastos por Categoria</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    innerRadius={40}
-                    fill="#8884d8"
-                    dataKey="value"
-                    strokeWidth={2}
-                    stroke="hsl(var(--card))"
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<PieTooltip />} />
-                </PieChart>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <ArrowDownRight className="w-4 h-4 text-emerald-500" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Receitas</p>
+                    <p className="text-sm font-bold text-foreground">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ArrowUpRight className="w-4 h-4 text-destructive" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Despesas</p>
+                    <p className="text-sm font-bold text-foreground">R$ {totalSpending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={comparisonData} barGap={4}>
+                  <XAxis dataKey="month" tick={axisStyle} axisLine={false} tickLine={false} />
+                  <YAxis tick={axisStyle} axisLine={false} tickLine={false} hide />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="income" name="Receitas" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="expenses" name="Despesas" fill="hsl(var(--foreground))" radius={[4, 4, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
+        </div>
 
-          <Card className="shadow-lg border-border bg-card">
-            <CardHeader>
-              <CardTitle className="text-xl text-foreground">💰 Receitas por Tipo</CardTitle>
+        {/* Bottom row: Category donut + Balance evolution */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-foreground">Gastos por Categoria</CardTitle>
             </CardHeader>
             <CardContent>
-              {incomeTypeData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={incomeTypeData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      innerRadius={40}
-                      fill="#8884d8"
-                      dataKey="value"
-                      strokeWidth={2}
-                      stroke="hsl(var(--card))"
-                    >
-                      {incomeTypeData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<PieTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
+              {categoryData.length === 0 ? (
+                <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                  <p className="text-sm">Cadastre compras para visualizar</p>
+                </div>
               ) : (
-                <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-                  <div className="text-center">
-                    <Wallet className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
-                    <p>Cadastre suas entradas para ver o gráfico</p>
+                <div className="flex items-center gap-4">
+                  <ResponsiveContainer width="50%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={90}
+                        innerRadius={55}
+                        dataKey="value"
+                        strokeWidth={2}
+                        stroke="hsl(var(--card))"
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<PieTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex-1 space-y-1.5">
+                    {categoryData.sort((a, b) => b.value - a.value).slice(0, 5).map((cat, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                          <span className="text-foreground">{cat.name}</span>
+                        </div>
+                        <span className="text-muted-foreground font-medium">
+                          R$ {cat.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Category Breakdown */}
-        <Card className="shadow-lg border-border bg-card mb-8">
-          <CardHeader>
-            <CardTitle className="text-xl text-foreground">📋 Análise Detalhada por Categoria</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={categoryData} layout="vertical" barSize={20}>
-                <CartesianGrid {...gridStyle} />
-                <XAxis type="number" tick={axisStyle} axisLine={false} tickLine={false} />
-                <YAxis dataKey="name" type="category" width={120} tick={axisStyle} axisLine={false} tickLine={false} />
-                <Tooltip content={<PieTooltip />} />
-                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* AI Insights */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-lg text-foreground flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2" />
-                Insights da IA
-              </CardTitle>
+          <Card className="shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-foreground">Evolução do Saldo</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <p className="text-muted-foreground">
-                  🔍 <strong className="text-foreground">Análise Principal:</strong> {categoryData.length > 0 ? 
-                    `Sua maior categoria de gastos é ${categoryData.sort((a, b) => b.value - a.value)[0]?.name}` :
-                    'Comece cadastrando suas compras para receber análises personalizadas'
-                  }
-                </p>
-                <p className="text-muted-foreground">
-                  💰 <strong className="text-foreground">Saldo:</strong> {balance >= 0 ? 
-                    `Você está com saldo positivo de R$ ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}. Continue assim!` :
-                    `Atenção! Suas despesas superam suas receitas em R$ ${Math.abs(balance).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-                  }
-                </p>
-                <p className="text-muted-foreground">
-                  📊 <strong className="text-foreground">Tendência:</strong> {trend === 'up' ? 
-                    'Seus gastos aumentaram nas últimas compras. Considere revisar seu orçamento.' :
-                    'Parabéns! Seus gastos diminuíram recentemente.'
-                  }
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-lg text-foreground">Recomendações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <p className="text-muted-foreground">
-                  💡 <strong className="text-foreground">Economia:</strong> {savingsRate >= 20 ? 
-                    `Excelente! Você está economizando ${savingsRate.toFixed(1)}% das suas receitas.` :
-                    savingsRate >= 0 ?
-                    `Tente aumentar sua taxa de economia para pelo menos 20% das receitas.` :
-                    'Atenção: você está gastando mais do que ganha!'
-                  }
-                </p>
-                <p className="text-muted-foreground">
-                  📱 <strong className="text-foreground">Facilidade:</strong> Use nosso bot do WhatsApp para registrar compras rapidamente.
-                </p>
-                <p className="text-muted-foreground">
-                  📈 <strong className="text-foreground">Acompanhamento:</strong> Cadastre todas as suas receitas para ter uma visão completa.
-                </p>
-              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={comparisonData.map((item, index) => {
+                  const prev = comparisonData.slice(0, index).reduce((a, c) => a + (c.income - c.expenses), 0);
+                  return { month: item.month, balance: prev + (item.income - item.expenses) };
+                })}>
+                  <defs>
+                    <linearGradient id="balGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="month" tick={axisStyle} axisLine={false} tickLine={false} />
+                  <YAxis tick={axisStyle} axisLine={false} tickLine={false} hide />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="balance" name="Saldo" stroke="hsl(var(--primary))" fill="url(#balGrad)" strokeWidth={2.5} />
+                </AreaChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
