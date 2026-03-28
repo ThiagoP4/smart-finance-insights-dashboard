@@ -254,7 +254,7 @@ const Index = () => {
       case 'profile':
         return <ProfileScreen />;
       default:
-        return <Hero setActiveSection={setActiveSection} />;
+        return <Hero setActiveSection={setActiveSection} purchases={purchases} incomes={incomes} categories={categories} />;
     }
   };
 
