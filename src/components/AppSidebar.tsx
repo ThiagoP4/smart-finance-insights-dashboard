@@ -24,7 +24,7 @@ const AppSidebar = ({ onLogout, onNavigate, children }: AppSidebarProps) => {
 
   const menuItems = [
     { icon: User, label: 'Meu Perfil', action: () => onNavigate('profile') },
-    { icon: Settings, label: 'Configurações', action: () => {} },
+    { icon: Settings, label: 'Configurações', action: () => onNavigate('settings') },
     { icon: HelpCircle, label: 'Ajuda', action: () => {} },
     { icon: Info, label: 'Sobre', action: () => {} },
   ];

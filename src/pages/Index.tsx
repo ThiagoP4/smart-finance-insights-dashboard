@@ -6,6 +6,7 @@ import RegistrosScreen from '@/components/RegistrosScreen';
 import AIChatMode from '@/components/AIChatMode';
 import Login from '@/components/Login';
 import ProfileScreen from '@/components/ProfileScreen';
+import SettingsScreen from '@/components/SettingsScreen';
 
 interface Purchase {
   id: string;
@@ -253,6 +254,8 @@ const Index = () => {
         return <AIChatMode />;
       case 'profile':
         return <ProfileScreen />;
+      case 'settings':
+        return <SettingsScreen />;
       default:
         return <Hero setActiveSection={setActiveSection} purchases={purchases} incomes={incomes} categories={categories} />;
     }
