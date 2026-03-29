@@ -7,6 +7,7 @@ import AIChatMode from '@/components/AIChatMode';
 import Login from '@/components/Login';
 import ProfileScreen from '@/components/ProfileScreen';
 import SettingsScreen from '@/components/SettingsScreen';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Purchase {
   id: string;
@@ -32,7 +33,7 @@ interface Income {
 }
 
 const Index = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, loading, signOut } = useAuth();
   const [activeSection, setActiveSection] = useState('home');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -48,6 +49,7 @@ const Index = () => {
     setContextMode(mode);
     if (mode === 'card' && cardId) setSelectedCardId(cardId);
   };
+
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [categories, setCategories] = useState<Category[]>([
@@ -63,169 +65,56 @@ const Index = () => {
     { id: 'others', name: 'others', label: 'Outros' }
   ]);
 
-  // Check authentication status on component mount
+  // Load data from localStorage when authenticated
   useEffect(() => {
-    const authStatus = localStorage.getItem('financeAI_auth');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  // Load purchases, incomes and categories from localStorage on component mount
-  useEffect(() => {
-    if (isAuthenticated) {
+    if (user) {
       const savedPurchases = localStorage.getItem('financeAI_purchases');
       const savedCategories = localStorage.getItem('financeAI_categories');
       const savedIncomes = localStorage.getItem('financeAI_incomes');
       
-      if (savedPurchases) {
-        setPurchases(JSON.parse(savedPurchases));
-      } else {
-        // Add some sample data for demonstration
-        const samplePurchases: Purchase[] = [
-          {
-            id: '1',
-            description: 'Supermercado Extra',
-            amount: 150.50,
-            category: 'food',
-            date: '2024-06-10'
-          },
-          {
-            id: '2',
-            description: 'Netflix',
-            amount: 29.90,
-            category: 'subscriptions',
-            date: '2024-06-12'
-          },
-          {
-            id: '3',
-            description: 'Farmácia São Paulo',
-            amount: 45.80,
-            category: 'pharmacy',
-            date: '2024-06-14'
-          },
-          {
-            id: '4',
-            description: 'Uber',
-            amount: 18.50,
-            category: 'transport',
-            date: '2024-06-15'
-          }
-        ];
-        setPurchases(samplePurchases);
-        localStorage.setItem('financeAI_purchases', JSON.stringify(samplePurchases));
-      }
-
-      if (savedIncomes) {
-        setIncomes(JSON.parse(savedIncomes));
-      } else {
-        // Add sample income data
-        const sampleIncomes: Income[] = [
-          {
-            id: '1',
-            description: 'Salário Janeiro',
-            amount: 5000.00,
-            type: 'salary',
-            date: '2024-06-05',
-            recurring: true
-          },
-          {
-            id: '2',
-            description: 'Freelance Design',
-            amount: 1500.00,
-            type: 'freelance',
-            date: '2024-06-10',
-            recurring: false
-          }
-        ];
-        setIncomes(sampleIncomes);
-        localStorage.setItem('financeAI_incomes', JSON.stringify(sampleIncomes));
-      }
-
-      if (savedCategories) {
-        setCategories(JSON.parse(savedCategories));
-      }
+      if (savedPurchases) setPurchases(JSON.parse(savedPurchases));
+      if (savedIncomes) setIncomes(JSON.parse(savedIncomes));
+      if (savedCategories) setCategories(JSON.parse(savedCategories));
     }
-  }, [isAuthenticated]);
+  }, [user]);
 
-  // Save purchases to localStorage whenever purchases change
+  // Save to localStorage
   useEffect(() => {
-    if (isAuthenticated) {
-      localStorage.setItem('financeAI_purchases', JSON.stringify(purchases));
-    }
-  }, [purchases, isAuthenticated]);
+    if (user) localStorage.setItem('financeAI_purchases', JSON.stringify(purchases));
+  }, [purchases, user]);
 
-  // Save categories to localStorage whenever categories change
   useEffect(() => {
-    if (isAuthenticated) {
-      localStorage.setItem('financeAI_categories', JSON.stringify(categories));
-    }
-  }, [categories, isAuthenticated]);
+    if (user) localStorage.setItem('financeAI_categories', JSON.stringify(categories));
+  }, [categories, user]);
 
-  // Save incomes to localStorage whenever incomes change
   useEffect(() => {
-    if (isAuthenticated) {
-      localStorage.setItem('financeAI_incomes', JSON.stringify(incomes));
-    }
-  }, [incomes, isAuthenticated]);
+    if (user) localStorage.setItem('financeAI_incomes', JSON.stringify(incomes));
+  }, [incomes, user]);
 
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-    localStorage.setItem('financeAI_auth', 'true');
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('financeAI_auth');
+  const handleLogout = async () => {
+    await signOut();
     setActiveSection('home');
   };
 
-  const handleAddPurchase = (purchase: Purchase) => {
-    setPurchases(prev => [...prev, purchase]);
-  };
+  const handleAddPurchase = (purchase: Purchase) => setPurchases(prev => [...prev, purchase]);
+  const handleUpdatePurchase = (p: Purchase) => setPurchases(prev => prev.map(x => x.id === p.id ? p : x));
+  const handleDeletePurchase = (id: string) => setPurchases(prev => prev.filter(x => x.id !== id));
+  const handleAddCategory = (c: Category) => setCategories(prev => [...prev, c]);
+  const handleUpdateCategory = (c: Category) => setCategories(prev => prev.map(x => x.id === c.id ? c : x));
+  const handleDeleteCategory = (id: string) => setCategories(prev => prev.filter(x => x.id !== id));
+  const handleAddIncome = (i: Income) => setIncomes(prev => [...prev, i]);
+  const handleUpdateIncome = (i: Income) => setIncomes(prev => prev.map(x => x.id === i.id ? i : x));
+  const handleDeleteIncome = (id: string) => setIncomes(prev => prev.filter(x => x.id !== id));
 
-  const handleAddCategory = (category: Category) => {
-    setCategories(prev => [...prev, category]);
-  };
-
-  const handleUpdateCategory = (updatedCategory: Category) => {
-    setCategories(prev => prev.map(category => 
-      category.id === updatedCategory.id ? updatedCategory : category
-    ));
-  };
-
-  const handleDeleteCategory = (id: string) => {
-    setCategories(prev => prev.filter(category => category.id !== id));
-  };
-
-  const handleUpdatePurchase = (updatedPurchase: Purchase) => {
-    setPurchases(prev => prev.map(purchase => 
-      purchase.id === updatedPurchase.id ? updatedPurchase : purchase
-    ));
-  };
-
-  const handleDeletePurchase = (id: string) => {
-    setPurchases(prev => prev.filter(purchase => purchase.id !== id));
-  };
-
-  const handleAddIncome = (income: Income) => {
-    setIncomes(prev => [...prev, income]);
-  };
-
-  const handleUpdateIncome = (updatedIncome: Income) => {
-    setIncomes(prev => prev.map(income => 
-      income.id === updatedIncome.id ? updatedIncome : income
-    ));
-  };
-
-  const handleDeleteIncome = (id: string) => {
-    setIncomes(prev => prev.filter(income => income.id !== id));
-  };
-
-  // If not authenticated, show login screen
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
+
+  if (!user) return <Login />;
 
   const renderContent = () => {
     switch (activeSection) {
@@ -234,28 +123,18 @@ const Index = () => {
       case 'registros':
         return (
           <RegistrosScreen
-            purchases={purchases}
-            categories={categories}
-            incomes={incomes}
-            selectedMonth={selectedMonth}
-            selectedYear={selectedYear}
-            onUpdatePurchase={handleUpdatePurchase}
-            onDeletePurchase={handleDeletePurchase}
-            onAddPurchase={handleAddPurchase}
-            onUpdateIncome={handleUpdateIncome}
-            onDeleteIncome={handleDeleteIncome}
-            onAddIncome={handleAddIncome}
-            onAddCategory={handleAddCategory}
-            onUpdateCategory={handleUpdateCategory}
+            purchases={purchases} categories={categories} incomes={incomes}
+            selectedMonth={selectedMonth} selectedYear={selectedYear}
+            onUpdatePurchase={handleUpdatePurchase} onDeletePurchase={handleDeletePurchase}
+            onAddPurchase={handleAddPurchase} onUpdateIncome={handleUpdateIncome}
+            onDeleteIncome={handleDeleteIncome} onAddIncome={handleAddIncome}
+            onAddCategory={handleAddCategory} onUpdateCategory={handleUpdateCategory}
             onDeleteCategory={handleDeleteCategory}
           />
         );
-      case 'ai-mode':
-        return <AIChatMode />;
-      case 'profile':
-        return <ProfileScreen />;
-      case 'settings':
-        return <SettingsScreen />;
+      case 'ai-mode': return <AIChatMode />;
+      case 'profile': return <ProfileScreen />;
+      case 'settings': return <SettingsScreen />;
       default:
         return <Hero setActiveSection={setActiveSection} purchases={purchases} incomes={incomes} categories={categories} />;
     }
@@ -263,16 +142,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar 
-        activeSection={activeSection} 
-        setActiveSection={setActiveSection} 
-        onLogout={handleLogout}
-        selectedMonth={selectedMonth}
-        selectedYear={selectedYear}
-        onMonthChange={handleMonthChange}
-        contextMode={contextMode}
-        selectedCardId={selectedCardId}
-        onContextChange={handleContextChange}
+      <Navbar
+        activeSection={activeSection} setActiveSection={setActiveSection} onLogout={handleLogout}
+        selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={handleMonthChange}
+        contextMode={contextMode} selectedCardId={selectedCardId} onContextChange={handleContextChange}
       />
       {renderContent()}
     </div>
